@@ -1,6 +1,7 @@
 import Log from "../Util";
 import {IInsightFacade, InsightDataset, InsightDatasetKind} from "./IInsightFacade";
 import {InsightError, NotFoundError} from "./IInsightFacade";
+import Q = require("./Query");
 
 /**
  * This is the main programmatic entry point for the project.
@@ -8,6 +9,8 @@ import {InsightError, NotFoundError} from "./IInsightFacade";
  *
  */
 export default class InsightFacade implements IInsightFacade {
+
+    public datasets: {[id: string]: Dataset} = {courses: null, otherCourses: null};
 
     constructor() {
         Log.trace("InsightFacadeImpl::init()");
@@ -22,6 +25,14 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public performQuery(query: any): Promise<any[]> {
+        let q = new Q(query, this.datasets);
+        try {
+            q.performQueryTest(q.query);
+        } catch (error) {
+            if (error instanceof InsightError) {
+                return Promise.reject(new InsightError());
+            }
+        }
         return Promise.reject("Not implemented.");
     }
 
