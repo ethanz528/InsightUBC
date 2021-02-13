@@ -2,14 +2,14 @@ import {InsightError} from "./IInsightFacade";
 
 class Query {
     private query: any;
-    private datasets: {[id: string]: Dataset};
+    private datasets: {[id: string]: any};
     private columnKeys: string[] = [];
     private datasetId: string;
     private FILTERS: string[] = ["AND", "OR", "LT", "GT", "EQ", "IS", "NOT"];
     private MFIELDS: string[] = ["avg", "pass", "fail", "audit", "year"];
     private SFIELDS: string[] = ["dept", "id", "instructor", "title", "uuid"];
 
-    constructor(query: any, datasets: {[id: string]: Dataset}) {
+    constructor(query: any, datasets: {[id: string]: any}) {
         this.query = query;
         this.datasets = datasets;
     }

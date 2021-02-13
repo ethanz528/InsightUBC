@@ -10,7 +10,7 @@ import Q = require("./Query");
  */
 export default class InsightFacade implements IInsightFacade {
 
-    public datasets: {[id: string]: Dataset} = {courses: null, otherCourses: null};
+    public datasets: {[id: string]: any} = {courses: null, otherCourses: null};
 
     constructor() {
         Log.trace("InsightFacadeImpl::init()");
