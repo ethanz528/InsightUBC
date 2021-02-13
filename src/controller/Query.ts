@@ -31,9 +31,10 @@ class Query {
             || (Object.keys(query).length === 1 && !(this.isFilter(Object.keys(query)[0])))) {
             throw new InsightError();
         }
-        for (let key in query) {
-            // @ts-ignore
-            this[key + "Test"](query[key]);
+        for (const key in query) {
+            if (query.hasOwnProperty(key)) {
+                this[(key + "Test") as keyof Query](query[key]);
+            }
         }
     }
 
@@ -43,9 +44,8 @@ class Query {
             || !(this.allFilters(query))) {
             throw new InsightError();
         }
-        for (let key of query) {
-            // @ts-ignore
-            this[Object.keys(key)[0] + "Test"](Object.values(key)[0]);
+        for (const key of query) {
+            this[(Object.keys(key)[0] + "Test") as keyof Query](Object.values(key)[0]);
         }
     }
 
@@ -55,9 +55,8 @@ class Query {
             || !(this.allFilters(query))) {
             throw new InsightError();
         }
-        for (let key of query) {
-            // @ts-ignore
-            this[Object.keys(key)[0] + "Test"](Object.values(key)[0]);
+        for (const key of query) {
+            this[(Object.keys(key)[0] + "Test") as keyof Query](Object.values(key)[0]);
         }
     }
 
@@ -108,9 +107,10 @@ class Query {
             || !(this.isFilter(Object.keys(query)[0]))) {
             throw new InsightError();
         }
-        for (let key in query) {
-            // @ts-ignore
-            this[key + "Test"](query[key]);
+        for (const key in query) {
+            if (query.hasOwnProperty(key)) {
+                this[(key + "Test") as keyof Query](query[key]);
+            }
         }
     }
 
@@ -121,9 +121,10 @@ class Query {
             (Object.keys(query).length === 2 && !(query.hasOwnProperty("ORDER")))) {
             throw new InsightError();
         }
-        for (let key in query) {
-            // @ts-ignore
-            this[key + "Test"](query[key]);
+        for (const key in query) {
+            if (query.hasOwnProperty(key)) {
+                this[(key + "Test") as keyof Query](query[key]);
+            }
         }
     }
 
@@ -133,7 +134,7 @@ class Query {
             throw new InsightError();
         }
         this.datasetId = query[0].split("_")[0];
-        for (let key of query) {
+        for (const key of query) {
             if (!(this.isKey(key))
                 || !(this.datasets.hasOwnProperty(key.slice(0, key.indexOf("_"))))
                 || (!(this.MFIELDS.includes(key.split("_")[1])) && !(this.SFIELDS.includes(key.split("_")[1])))) {
@@ -150,7 +151,7 @@ class Query {
     }
 
     private allFilters(query: any): boolean {
-        for (let key of query) {
+        for (const key of query) {
             if (!(this.isFilter(Object.keys(key)[0]))) {
                 return false;
             }
