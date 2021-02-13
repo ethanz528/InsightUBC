@@ -27,7 +27,7 @@ export default class InsightFacade implements IInsightFacade {
     public performQuery(query: any): Promise<any[]> {
         let q = new Q(query, this.datasets);
         try {
-            q.performQueryTest(q.query);
+            q.performQueryTest();
         } catch (error) {
             if (error instanceof InsightError) {
                 return Promise.reject(new InsightError());

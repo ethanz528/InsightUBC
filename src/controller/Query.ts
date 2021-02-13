@@ -1,212 +1,181 @@
 import {InsightError} from "./IInsightFacade";
 
 class Query {
-    public query: any;
-    public datasets: {[id: string]: Dataset};
-    public FILTERS: string[] = ["AND", "OR", "LT", "GT", "EQ", "IS", "NOT"];
-    public MFIELDS: string[] = ["avg", "pass", "fail", "audit", "year"];
-    public SFIELDS: string[] = ["dept", "id", "instructor", "title", "uuid"];
-    public columnKeys: string[] = [];
-    public datasetId: string;
+    private query: any;
+    private datasets: {[id: string]: Dataset};
+    private columnKeys: string[] = [];
+    private datasetId: string;
+    private FILTERS: string[] = ["AND", "OR", "LT", "GT", "EQ", "IS", "NOT"];
+    private MFIELDS: string[] = ["avg", "pass", "fail", "audit", "year"];
+    private SFIELDS: string[] = ["dept", "id", "instructor", "title", "uuid"];
 
     constructor(query: any, datasets: {[id: string]: Dataset}) {
         this.query = query;
         this.datasets = datasets;
     }
 
-    public performQueryTest(query: any) {
-        // console.log("performQueryTest");
-        if (query.constructor !== Object
-            || Object.keys(query).length !== 2
-            || !query.hasOwnProperty("WHERE")
-            || !query.hasOwnProperty("OPTIONS")) {
-            // console.log("performQueryTest Error");
+    public performQueryTest() {
+        if (this.query.constructor !== Object
+            || Object.keys(this.query).length !== 2
+            || !(this.query.hasOwnProperty("WHERE"))
+            || !(this.query.hasOwnProperty("OPTIONS"))) {
             throw new InsightError();
         }
-        this["OPTIONS"](query["OPTIONS"]);
-        this["WHERE"](query["WHERE"]);
+        this["OPTIONSTest"](this.query["OPTIONS"]);
+        this["WHERETest"](this.query["WHERE"]);
     }
 
-    public WHERE(query: any) {
-        // console.log("WHERE");
+    public WHERETest(query: any) {
         if (query.constructor !== Object
             || Object.keys(query).length > 1
-            || (Object.keys(query).length === 1 && !this.FILTERS.includes(Object.keys(query)[0]))) {
-            // console.log("WHERE Error");
+            || (Object.keys(query).length === 1 && !(this.isFilter(Object.keys(query)[0])))) {
             throw new InsightError();
         }
         for (let key in query) {
             // @ts-ignore
-            this[key](query[key]);
+            this[key + "Test"](query[key]);
         }
     }
 
-    public AND(query: any) {
-        // console.log("AND");
+    public ANDTest(query: any) {
         if (!(query instanceof Array)
-            || query.length === 0) {
-            // console.log("AND Error");
+            || query.length === 0
+            || !(this.allFilters(query))) {
             throw new InsightError();
         }
         for (let key of query) {
-            if (!(this.FILTERS.includes(Object.keys(key)[0]))) {
-                // console.log("AND Error");
-                throw new InsightError();
-            }
             // @ts-ignore
-            this[Object.keys(key)[0]](Object.values(key)[0]);
+            this[Object.keys(key)[0] + "Test"](Object.values(key)[0]);
         }
     }
 
-    public OR(query: any) {
-        // console.log("OR");
+    public ORTest(query: any) {
         if (!(query instanceof Array)
-            || query.length === 0) {
-            // console.log("OR Error");
+            || query.length === 0
+            || !(this.allFilters(query))) {
             throw new InsightError();
         }
         for (let key of query) {
-            if (!(this.FILTERS.includes(Object.keys(key)[0]))) {
-                // console.log("OR Error");
-                throw new InsightError();
-            }
             // @ts-ignore
-            this[Object.keys(key)[0]](Object.values(key)[0]);
+            this[Object.keys(key)[0] + "Test"](Object.values(key)[0]);
         }
     }
 
-    public LT(query: any) {
-        // console.log("LT");
+    public LTTest(query: any) {
         if (query.constructor !== Object
             || Object.keys(query).length !== 1
-            || Object.keys(query)[0].split("_").length !== 2
-            || Object.keys(query)[0].charAt(0) === "_"
-            || !(this.datasets.hasOwnProperty(Object.keys(query)[0].slice(0, Object.keys(query)[0].indexOf("_"))))
-            || !(this.datasetId === Object.keys(query)[0].split("_")[0])
-            || !(this.MFIELDS.includes(Object.keys(query)[0].split("_")[1]))
-            // @ts-ignore
-            || !(Number.isInteger(Object.values(query)[0]))) {
-            // console.log("LT Error");
+            || !(this.isMKey(Object.keys(query)[0]))
+            || !(Number.isInteger(Object.values(query)[0] as number))) {
             throw new InsightError();
         }
     }
 
-    public GT(query: any) {
-        // console.log("GT");
+    public GTTest(query: any) {
         if (query.constructor !== Object
             || Object.keys(query).length !== 1
-            || Object.keys(query)[0].split("_").length !== 2
-            || Object.keys(query)[0].charAt(0) === "_"
-            || !(this.datasets.hasOwnProperty(Object.keys(query)[0].slice(0, Object.keys(query)[0].indexOf("_"))))
-            || !(this.datasetId === Object.keys(query)[0].split("_")[0])
-            || !(this.MFIELDS.includes(Object.keys(query)[0].split("_")[1]))
-            // @ts-ignore
-            || !(Number.isInteger(Object.values(query)[0]))) {
-            // console.log("GT Error");
+            || !(this.isMKey(Object.keys(query)[0]))
+            || !(Number.isInteger(Object.values(query)[0] as number))) {
             throw new InsightError();
         }
     }
 
-    public EQ(query: any) {
-        // console.log("EQ");
+    public EQTest(query: any) {
         if (query.constructor !== Object
             || Object.keys(query).length !== 1
-            || Object.keys(query)[0].split("_").length !== 2
-            || Object.keys(query)[0].charAt(0) === "_"
-            || !(this.datasets.hasOwnProperty(Object.keys(query)[0].slice(0, Object.keys(query)[0].indexOf("_"))))
-            || !(this.datasetId === Object.keys(query)[0].split("_")[0])
-            || !(this.MFIELDS.includes(Object.keys(query)[0].split("_")[1]))
-            // @ts-ignore
-            || !(Number.isInteger(Object.values(query)[0]))) {
-            // console.log("EQ Error");
+            || !(this.isMKey(Object.keys(query)[0]))
+            || !(Number.isInteger(Object.values(query)[0] as number))) {
             throw new InsightError();
         }
     }
 
-    public IS(query: any) {
-        // console.log("IS");
+    public ISTest(query: any) {
         if (query.constructor !== Object
             || Object.keys(query).length !== 1
-            || Object.keys(query)[0].split("_").length !== 2
-            || Object.keys(query)[0].charAt(0) === "_"
-            || !(this.datasets.hasOwnProperty(Object.keys(query)[0].slice(0, Object.keys(query)[0].indexOf("_"))))
-            || !(this.datasetId === Object.keys(query)[0].split("_")[0])
-            || !(this.SFIELDS.includes(Object.keys(query)[0].split("_")[1]))
+            || !(this.isSKey(Object.keys(query)[0]))
             || !(typeof Object.values(query)[0] === "string")
-            // @ts-ignore
-            || Object.values(query)[0].split("*").length > 3
-            // @ts-ignore
-            || ((Object.values(query)[0].charAt(0) === "*")
-                // @ts-ignore
-                + (Object.values(query)[0].charAt(Object.values(query)[0].length - 1) === "*")
-                // @ts-ignore
-                < Object.values(query)[0].split("*").length - 1)) {
-            // console.log("IS Error");
+            || (Object.values(query)[0] as string).split("*").length > 3
+            || (((((Object.values(query)[0] as string).charAt(0) === "*") as unknown) as number)
+                + ((((Object.values(query)[0] as string).charAt(
+                    (Object.values(query)[0] as any[]).length - 1) === "*") as unknown) as number)
+                < (Object.values(query)[0] as string).split("*").length - 1)) {
             throw new InsightError();
         }
     }
 
-    public NOT(query: any) {
-        // console.log("NOT");
+    public NOTTest(query: any) {
         if (query.constructor !== Object
             || Object.keys(query).length !== 1
-            || !this.FILTERS.includes(Object.keys(query)[0])) {
-            // console.log("WHERE Error");
+            || !(this.isFilter(Object.keys(query)[0]))) {
             throw new InsightError();
         }
         for (let key in query) {
-            // console.log(query[key]);
             // @ts-ignore
-            this[key](query[key]);
+            this[key + "Test"](query[key]);
         }
     }
 
-    public OPTIONS(query: any) {
-        // console.log("OPTIONS");
+    public OPTIONSTest(query: any) {
         if (query.constructor !== Object ||
             Object.keys(query).length > 2 ||
             !(query.hasOwnProperty("COLUMNS")) ||
             (Object.keys(query).length === 2 && !(query.hasOwnProperty("ORDER")))) {
-            // console.log("OPTIONS Error");
             throw new InsightError();
         }
         for (let key in query) {
             // @ts-ignore
-            this[key](query[key]);
+            this[key + "Test"](query[key]);
         }
     }
 
-    public COLUMNS(query: any) {
-        // console.log("COLUMNS");
+    public COLUMNSTest(query: any) {
         if (!(query instanceof Array)
             || query.length === 0) {
             throw new InsightError();
         }
         this.datasetId = query[0].split("_")[0];
         for (let key of query) {
-            if (key.split("_").length !== 2
-                || key.charAt(0) === "_"
+            if (!(this.isKey(key))
                 || !(this.datasets.hasOwnProperty(key.slice(0, key.indexOf("_"))))
-                || !(this.datasetId === key.split("_")[0])
                 || (!(this.MFIELDS.includes(key.split("_")[1])) && !(this.SFIELDS.includes(key.split("_")[1])))) {
-                // console.log("COLUMNS Error");
                 throw new InsightError();
             }
             this.columnKeys.push(key);
         }
     }
 
-    public ORDER(query: any) {
-        // console.log("ORDER");
-        if (!(typeof query === "string")
-            || query.split("_").length !== 2
-            || query.charAt(0) === "_"
-            || !(this.datasets.hasOwnProperty(query.slice(0, query.indexOf("_"))))
-            || (!(this.MFIELDS.includes(query.split("_")[1])) && !(this.SFIELDS.includes(query.split("_")[1])))
-            || !(this.columnKeys.includes(query))) {
-            // console.log("ORDER Error");
+    public ORDERTest(query: any) {
+        if (!(this.columnKeys.includes(query))) {
             throw new InsightError();
         }
+    }
+
+    private allFilters(query: any): boolean {
+        for (let key of query) {
+            if (!(this.isFilter(Object.keys(key)[0]))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private isFilter(item: any): boolean {
+        return this.FILTERS.includes(item);
+    }
+
+    private isMKey(key: any): boolean {
+        return (this.isKey(key))
+            && (this.MFIELDS.includes(key.split("_")[1]));
+    }
+
+    private isSKey(key: any): boolean {
+        return (this.isKey(key))
+            && (this.SFIELDS.includes(key.split("_")[1]));
+    }
+
+    private isKey(key: any): boolean {
+        return !(key.split("_").length !== 2)
+            && !(key.charAt(0) === "_")
+            && (this.datasetId === key.split("_")[0]);
     }
 
 }
