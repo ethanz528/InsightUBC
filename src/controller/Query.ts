@@ -179,7 +179,6 @@ class Query {
             && (this.datasetId === key.split("_")[0]);
     }
 
-
 }
 
 export = Query;
