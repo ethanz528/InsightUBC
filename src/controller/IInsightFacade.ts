@@ -62,8 +62,6 @@ export interface IInsightFacade {
      * Ultimately, a dataset must be added or loaded from disk before queries can
      * be successfully answered.
      */
-    // Add data structure as variable in class. JSON.parse() JSON.stringify(). IF any keys we are using are missing
-    // from section, then skip section. Use JSZip module for unzipping files.
     addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]>;
 
     /**

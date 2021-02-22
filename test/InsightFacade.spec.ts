@@ -6,6 +6,8 @@ import {InsightDatasetKind, InsightError} from "../src/controller/IInsightFacade
 import InsightFacade from "../src/controller/InsightFacade";
 import Log from "../src/Util";
 import TestUtil from "./TestUtil";
+import {isIdInvalid} from "../src/controller/idChecker";
+import {isValidZip} from "../src/controller/fileValidator";
 
 // This extends chai with assertions that natively support Promises
 chai.use(chaiAsPromised);
@@ -74,7 +76,16 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
             Log.error(err);
         }
     });
-
+    // ****
+    // ******
+    // Ethan's tests BEGIN.
+    // ******
+    // ****
+    // ****
+    // ******
+    // Ethan's tests END.
+    // ******
+    // ****
     // ****
     // ******
     // addDataset 1 dataset FULFILL
@@ -230,7 +241,46 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
             return expect(futureResult).to.eventually.deep.equal(expected2);
         });
     });
-
+    // ****
+    // ******
+    // idChecker tests
+    // ******
+    // ****
+    it("Should return false for valid IDs", function () {
+        const id: string = "courses";
+        const result: boolean = isIdInvalid(id);
+        return expect(result).to.deep.equal(false);
+    });
+    it("Should return false for valid IDs", function () {
+        const id: string = " abc %";
+        const result: boolean = isIdInvalid(id);
+        return expect(result).to.deep.equal(false);
+    });
+    it("Should return true for invalid IDs", function () {
+        const id: string = "ubc_course";
+        const result: boolean = isIdInvalid(id);
+        return expect(result).to.deep.equal(true);
+    });
+    it("Should return true for invalid IDs", function () {
+        const id: string = "  ";
+        const result: boolean = isIdInvalid(id);
+        return expect(result).to.deep.equal(true);
+    });
+    // ****
+    // ******
+    // fileValidator tests
+    // ******
+    // ****
+    it("Should return false as we are adding an invalid zip", function () {
+        const id: string = "notZip";
+        const result: boolean = isValidZip(datasets[id]);
+        return expect(result).to.deep.equal(false);
+    });
+    it("Should return true as we are adding a valid zip", function () {
+        const id: string = "validDataset";
+        const result: boolean = isValidZip(datasets[id]);
+        return expect(result).to.deep.equal(true);
+    });
 });
 
 /*
