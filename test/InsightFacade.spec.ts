@@ -2,10 +2,12 @@ import { expect } from "chai";
 import * as chai from "chai";
 import * as fs from "fs-extra";
 import * as chaiAsPromised from "chai-as-promised";
-import {InsightDatasetKind} from "../src/controller/IInsightFacade";
+import {InsightDatasetKind, InsightError} from "../src/controller/IInsightFacade";
 import InsightFacade from "../src/controller/InsightFacade";
 import Log from "../src/Util";
 import TestUtil from "./TestUtil";
+import {isIdInvalid} from "../src/controller/idChecker";
+import {isValidZip} from "../src/controller/fileValidator";
 
 // This extends chai with assertions that natively support Promises
 chai.use(chaiAsPromised);
@@ -25,6 +27,13 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
     // automatically be loaded in the 'before' hook.
     const datasetsToLoad: { [id: string]: string } = {
         courses: "./test/data/courses.zip",
+        notZip: "./test/data/notZip.7z",
+        vourses: "./test/data/vourses.zip",
+        notJSON1f: "./test/data/notJSON1f.zip",
+        notJSON3f: "./test/data/notJSON3f.zip",
+        oneJSON2f: "./test/data/oneJSON2f.zip",
+        baseCasex3: "./test/data/baseCasex3.zip",
+        validDataset: "./test/data/validDataset.zip",
     };
     let datasets: { [id: string]: string } = {};
     let insightFacade: InsightFacade;
@@ -67,13 +76,210 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
             Log.error(err);
         }
     });
-
+    // ****
+    // ******
+    // Ethan's tests BEGIN.
+    // ******
+    // ****
+    // ****
+    // ******
+    // Ethan's tests END.
+    // ******
+    // ****
+    // ****
+    // ******
+    // addDataset 1 dataset FULFILL
+    // ******
+    // ****
     // This is a unit test. You should create more like this!
     it("Should add a valid dataset", function () {
         const id: string = "courses";
         const expected: string[] = [id];
         const futureResult: Promise<string[]> = insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
         return expect(futureResult).to.eventually.deep.equal(expected);
+    });
+    it("Valid dataset, base case, single file in JSON, 0 sections", function () {
+        const id: string = "baseCase";
+        const expected: string[] = [id];
+        const futureResult: Promise<string[]> = insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
+        return expect(futureResult).to.eventually.deep.equal(expected);
+    });
+    it("Valid dataset, 3 files in JSON all with 0 sections", function () {
+        const id: string = "baseCasex3";
+        const expected: string[] = [id];
+        const futureResult: Promise<string[]> = insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
+        return expect(futureResult).to.eventually.deep.equal(expected);
+    });
+    it("Valid dataset, 2 files and only 1 in JSON", function () {
+        const id: string = "oneJSON2f";
+        const expected: string[] = [id];
+        const futureResult: Promise<string[]> = insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
+        return expect(futureResult).to.eventually.deep.equal(expected);
+    });
+    it("Valid dataset ID, space and character mix", function () {
+        const id: string = " a a ";
+        const expected: string[] = [id];
+        const dummy: string = "courses";
+        const futureResult: Promise<string[]> =
+            insightFacade.addDataset(id, datasets[dummy], InsightDatasetKind.Courses);
+        return expect(futureResult).to.eventually.deep.equal(expected);
+    });
+    // ****
+    // ******
+    // addDataset multiple dataset FULFILL
+    // ******
+    // ****
+    it("3 valid datasets being added", function () {
+        const id: string = "courses";
+        const id1: string = "baseCase";
+        const id2: string = "validDataset";
+        const expected: string[] = [id, id1, id2];
+        const futureResult: Promise<string[]> =
+            insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses).
+            then(function () {
+                return insightFacade.addDataset(id1, datasets[id1], InsightDatasetKind.Courses); }).
+            then(function () {
+                return insightFacade.addDataset(id2, datasets[id2], InsightDatasetKind.Courses); });
+        return expect(futureResult).to.eventually.deep.equal(expected);
+    });
+    // ****
+    // ******
+    // addDataset 1 dataset REJECT
+    // ******
+    // ****
+    it("Should not add invalid dataset, not a ZIP", function () {
+        const id: string = "notZip";
+        const futureResult: Promise<string[]> = insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
+        return expect(futureResult).to.be.rejectedWith(InsightError);
+        }
+    );
+    it("Files under a folder called vourses, not courses", function () {
+        const id: string = "vourses";
+        const futureResult: Promise<string[]> = insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
+        return expect(futureResult).to.be.rejectedWith(InsightError);
+        }
+    );
+    it("1 file in courses and not in JSON format", function () {
+        const id: string = "notJSON1f";
+        const futureResult: Promise<string[]> = insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
+        return expect(futureResult).to.be.rejectedWith(InsightError);
+        }
+    );
+    it("3 files in courses and non in JSON format", function () {
+        const id: string = "notJSON3f";
+        const futureResult: Promise<string[]> = insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
+        return expect(futureResult).to.be.rejectedWith(InsightError);
+        }
+    );
+    it("Invalid ID, _ at the beginning", function () {
+        const id: string = "_course";
+        const dummy: string = "courses";
+        const futureResult: Promise<string[]> =
+            insightFacade.addDataset(id, datasets[dummy], InsightDatasetKind.Courses);
+        return expect(futureResult).to.be.rejectedWith(InsightError);
+        }
+    );
+    it("Invalid ID, _ at the end", function () {
+        const id: string = "course_";
+        const dummy: string = "courses";
+        const futureResult: Promise<string[]> =
+                insightFacade.addDataset(id, datasets[dummy], InsightDatasetKind.Courses);
+        return expect(futureResult).to.be.rejectedWith(InsightError);
+        }
+    );
+    it("Invalid ID, _ in the middle", function () {
+        const id: string = "cou_rse";
+        const dummy: string = "courses";
+        const futureResult: Promise<string[]> =
+                insightFacade.addDataset(id, datasets[dummy], InsightDatasetKind.Courses);
+        return expect(futureResult).to.be.rejectedWith(InsightError);
+        }
+    );
+    it("Invalid ID, only blank spaces", function () {
+        const id: string = "   ";
+        const dummy: string = "courses";
+        const futureResult: Promise<string[]> =
+            insightFacade.addDataset(id, datasets[dummy], InsightDatasetKind.Courses);
+        return expect(futureResult).to.be.rejectedWith(InsightError);
+    });
+    // ****
+    // ******
+    // addDataset multiple dataset REJECT
+    // ******
+    // ****
+    it("Add first dataset, add second with same name, reject second", function () {
+        const id: string = "courses";
+        const id1: string = "courses";
+        const expected: string[] = [id];
+        let futureResult: Promise<string[]> =
+            insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
+        return expect(futureResult).to.eventually.deep.equal(expected).
+        then(function () {
+            futureResult = insightFacade.addDataset(id1, datasets[id1], InsightDatasetKind.Courses);
+            return expect(futureResult).to.be.rejectedWith(InsightError);
+        });
+    });
+    // ****
+    // ******
+    // addDataset multiple datasets REJECT and FULFILL mix
+    // ******
+    // ****
+    it("Should try to add 3 datasets, only rejects second (not JSON format)", function () {
+        const id: string = "courses";
+        const id1: string = "notJSON3f";
+        const id2: string = "validDataset";
+        const expected: string[] = [id];
+        const expected2: string[] = [id, id2];
+        let futureResult: Promise<string[]> =
+            insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
+        return expect(futureResult).to.eventually.deep.equal(expected).
+        then(function () {
+            futureResult = insightFacade.addDataset(id1, datasets[id1], InsightDatasetKind.Courses);
+            return expect(futureResult).to.be.rejectedWith(InsightError);
+        }).then(function () {
+            futureResult = insightFacade.addDataset(id2, datasets[id2], InsightDatasetKind.Courses);
+            return expect(futureResult).to.eventually.deep.equal(expected2);
+        });
+    });
+    // ****
+    // ******
+    // idChecker tests
+    // ******
+    // ****
+    it("Should return false for valid IDs", function () {
+        const id: string = "courses";
+        const result: boolean = isIdInvalid(id);
+        return expect(result).to.deep.equal(false);
+    });
+    it("Should return false for valid IDs", function () {
+        const id: string = " abc %";
+        const result: boolean = isIdInvalid(id);
+        return expect(result).to.deep.equal(false);
+    });
+    it("Should return true for invalid IDs", function () {
+        const id: string = "ubc_course";
+        const result: boolean = isIdInvalid(id);
+        return expect(result).to.deep.equal(true);
+    });
+    it("Should return true for invalid IDs", function () {
+        const id: string = "  ";
+        const result: boolean = isIdInvalid(id);
+        return expect(result).to.deep.equal(true);
+    });
+    // ****
+    // ******
+    // fileValidator tests
+    // ******
+    // ****
+    it("Should return false as we are adding an invalid zip", function () {
+        const id: string = "notZip";
+        const result: boolean = isValidZip(datasets[id]);
+        return expect(result).to.deep.equal(false);
+    });
+    it("Should return true as we are adding a valid zip", function () {
+        const id: string = "validDataset";
+        const result: boolean = isValidZip(datasets[id]);
+        return expect(result).to.deep.equal(true);
     });
 });
 

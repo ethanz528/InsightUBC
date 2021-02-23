@@ -1,6 +1,8 @@
 import Log from "../Util";
 import {IInsightFacade, InsightDataset, InsightDatasetKind} from "./IInsightFacade";
 import {InsightError, NotFoundError} from "./IInsightFacade";
+import {isIdInvalid} from "./idChecker";
+import {Dataset} from "./dataset";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -9,12 +11,23 @@ import {InsightError, NotFoundError} from "./IInsightFacade";
  */
 export default class InsightFacade implements IInsightFacade {
 
+    private addedDatasets: Dataset[] = [];
+    private idList: string[] = [];
+
     constructor() {
         Log.trace("InsightFacadeImpl::init()");
     }
 
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
-        return Promise.reject("Not implemented.");
+        let newDataset: Dataset;
+        if (isIdInvalid(id)) {
+            return Promise.reject(new InsightError("ID invalid, contains underscore OR is only white space," +
+                "dataset NOT added."));
+        }
+        newDataset = new Dataset(id, content);
+        this.idList.push(id);
+        this.addedDatasets.push(newDataset);
+        return Promise.resolve(this.idList);
     }
 
     public removeDataset(id: string): Promise<string> {
