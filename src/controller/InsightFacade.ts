@@ -1,6 +1,8 @@
 import Log from "../Util";
 import {IInsightFacade, InsightDataset, InsightDatasetKind} from "./IInsightFacade";
 import {InsightError, NotFoundError, ResultTooLargeError} from "./IInsightFacade";
+import {isIdInvalid} from "./idChecker";
+import {Dataset} from "./dataset";
 import Q = require("./Query");
 
 /**
@@ -10,7 +12,7 @@ import Q = require("./Query");
  */
 export default class InsightFacade implements IInsightFacade {
 
-    private addedDatasets: any[] = [];
+    private addedDatasets: Dataset[] = [];
     private idList: string[] = [];
     private testIdList: string[] = ["courses", "otherCourses"];
 
@@ -19,7 +21,15 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
-        return Promise.reject("Not implemented.");
+        let newDataset: Dataset;
+        if (isIdInvalid(id)) {
+            return Promise.reject(new InsightError("ID invalid, contains underscore OR is only white space," +
+                "dataset NOT added."));
+        }
+        newDataset = new Dataset(id, content);
+        this.idList.push(id);
+        this.addedDatasets.push(newDataset);
+        return Promise.resolve(this.idList);
     }
 
     public removeDataset(id: string): Promise<string> {
