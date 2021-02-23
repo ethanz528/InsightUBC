@@ -2,16 +2,27 @@ import {InsightError} from "./IInsightFacade";
 
 class Query {
     private query: any;
-    private datasets: {[id: string]: any};
+    private datasets: any[];
+    private idList: string[];
     private columnKeys: string[] = [];
     private datasetId: string;
     private FILTERS: string[] = ["AND", "OR", "LT", "GT", "EQ", "IS", "NOT"];
     private MFIELDS: string[] = ["avg", "pass", "fail", "audit", "year"];
     private SFIELDS: string[] = ["dept", "id", "instructor", "title", "uuid"];
 
-    constructor(query: any, datasets: {[id: string]: any}) {
+    constructor(query: any, datasets: any[], idList: string[]) {
         this.query = query;
         this.datasets = datasets;
+        this.idList = idList;
+    }
+
+    public performQuery() {
+        this.performQueryTest();
+        this.performQueryHelper();
+    }
+
+    public performQueryHelper() {
+        return;
     }
 
     public performQueryTest() {
@@ -136,7 +147,7 @@ class Query {
         this.datasetId = query[0].split("_")[0];
         for (const key of query) {
             if (!(this.isKey(key))
-                || !(this.datasets.hasOwnProperty(key.slice(0, key.indexOf("_"))))
+                || !(this.idList.includes(key.slice(0, key.indexOf("_"))))
                 || (!(this.MFIELDS.includes(key.split("_")[1])) && !(this.SFIELDS.includes(key.split("_")[1])))) {
                 throw new InsightError();
             }

@@ -1,6 +1,6 @@
 import Log from "../Util";
 import {IInsightFacade, InsightDataset, InsightDatasetKind} from "./IInsightFacade";
-import {InsightError, NotFoundError} from "./IInsightFacade";
+import {InsightError, NotFoundError, ResultTooLargeError} from "./IInsightFacade";
 import Q = require("./Query");
 
 /**
@@ -10,7 +10,9 @@ import Q = require("./Query");
  */
 export default class InsightFacade implements IInsightFacade {
 
-    public datasets: {[id: string]: any} = {courses: null, otherCourses: null};
+    private addedDatasets: any[] = [];
+    private idList: string[] = [];
+    private testIdList: string[] = ["courses", "otherCourses"];
 
     constructor() {
         Log.trace("InsightFacadeImpl::init()");
@@ -25,12 +27,12 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public performQuery(query: any): Promise<any[]> {
-        let q = new Q(query, this.datasets);
+        let q = new Q(query, this.addedDatasets, this.testIdList);
         try {
-            q.performQueryTest();
+            q.performQuery();
         } catch (error) {
-            if (error instanceof InsightError) {
-                return Promise.reject(new InsightError());
+            if ((error instanceof InsightError) || (error instanceof ResultTooLargeError)) {
+                return Promise.reject(error);
             }
         }
         return Promise.reject("Not implemented.");
