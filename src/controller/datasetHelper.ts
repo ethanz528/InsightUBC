@@ -10,7 +10,7 @@ export let generateCourseSecList = function (content: string): Promise<CourseSec
     });
 };
 
-let loadFromContent = function (c: string): Promise<string[]> {
+export let loadFromContent = function (c: string): Promise<string[]> {
     let zip = new JSZip();
     return zip.loadAsync(c, {base64: true}).then((updatedZip): Promise<string[]> => {
         let promiseArray: any[] = [];

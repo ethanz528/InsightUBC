@@ -7,7 +7,7 @@ import InsightFacade from "../src/controller/InsightFacade";
 import Log from "../src/Util";
 import TestUtil from "./TestUtil";
 import {isIdInvalid} from "../src/controller/idChecker";
-import {isValidZip} from "../src/controller/fileValidator";
+import {atLeastOneJSON, isRootDirCourses, isValidZip} from "../src/controller/fileValidator";
 
 // This extends chai with assertions that natively support Promises
 chai.use(chaiAsPromised);
@@ -76,16 +76,6 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
             Log.error(err);
         }
     });
-    // ****
-    // ******
-    // Ethan's tests BEGIN.
-    // ******
-    // ****
-    // ****
-    // ******
-    // Ethan's tests END.
-    // ******
-    // ****
     // ****
     // ******
     // addDataset 1 dataset FULFILL
@@ -273,13 +263,33 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
     // ****
     it("Should return false as we are adding an invalid zip", function () {
         const id: string = "notZip";
-        const result: boolean = isValidZip(datasets[id]);
-        return expect(result).to.deep.equal(false);
+        const result: Promise<boolean> = isValidZip(datasets[id]);
+        return expect(result).to.eventually.deep.equal(false);
     });
     it("Should return true as we are adding a valid zip", function () {
         const id: string = "validDataset";
-        const result: boolean = isValidZip(datasets[id]);
-        return expect(result).to.deep.equal(true);
+        const result: Promise<boolean> = isValidZip(datasets[id]);
+        return expect(result).to.eventually.deep.equal(true);
+    });
+    it("Should return true as root directory is course", function () {
+        const id: string = "courses";
+        const result: Promise<boolean> = isRootDirCourses(datasets[id]);
+        return expect(result).eventually.deep.equal(true);
+    });
+    it("Should return false as root directory is not courses", function () {
+        const id: string = "vourses";
+        const result: Promise<boolean> = isRootDirCourses(datasets[id]);
+        return expect(result).to.eventually.deep.equal(false);
+    });
+    it("Should return true as at least 1 JSON format in courses", function () {
+        const id: string = "oneJSON2f";
+        const result: Promise<boolean> = atLeastOneJSON(datasets[id]);
+        return expect(result).to.eventually.deep.equal(true);
+    });
+    it("Should return false as no files in JSON format in courses", function () {
+        const id: string = "notJSON3f";
+        const result: Promise<boolean> = atLeastOneJSON(datasets[id]);
+        return expect(result).to.eventually.deep.equal(false);
     });
 });
 
