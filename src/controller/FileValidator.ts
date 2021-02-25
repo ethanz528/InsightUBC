@@ -1,5 +1,5 @@
 import * as JSZip from "jszip";
-import {loadFromContent} from "./datasetHelper";
+import {loadFromContent} from "./DatasetHelper";
 
 export let isFileValid = function (content: string): Promise<boolean> {
     return isValidZip(content).then((val) => {
@@ -57,7 +57,7 @@ let foundOneInJSON = function (list: string[]): boolean {
     return false;
 };
 
-let isJSON = function (item: string): boolean {
+export let isJSON = function (item: string): boolean {
     try {
         JSON.parse(item);
         return true;

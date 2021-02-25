@@ -6,8 +6,10 @@ import {InsightDatasetKind, InsightError} from "../src/controller/IInsightFacade
 import InsightFacade from "../src/controller/InsightFacade";
 import Log from "../src/Util";
 import TestUtil from "./TestUtil";
-import {isIdInvalid} from "../src/controller/idChecker";
-import {atLeastOneJSON, isRootDirCourses, isValidZip} from "../src/controller/fileValidator";
+import {isIdInvalid} from "../src/controller/IdChecker";
+import {atLeastOneJSON, isRootDirCourses, isValidZip} from "../src/controller/FileValidator";
+import {saveToData} from "../src/controller/SaveAndLoad";
+import {Dataset} from "../src/controller/Dataset";
 
 // This extends chai with assertions that natively support Promises
 chai.use(chaiAsPromised);
@@ -105,7 +107,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
         const futureResult: Promise<string[]> = insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
         return expect(futureResult).to.eventually.deep.equal(expected);
     });
-    it("Should add a valid dataset", function () {
+    it("Should add a partially valid dataset", function () {
         const id: string = "someInvalid";
         const expected: string[] = [id];
         const futureResult: Promise<string[]> = insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
@@ -324,6 +326,20 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
         const id: string = "invalidJSON";
         const result: Promise<boolean> = atLeastOneJSON(datasets[id]);
         return expect(result).to.eventually.deep.equal(false);
+    });
+    // ****
+    // ******
+    // saveToData tests
+    // ******
+    // ****
+    it("Should add a partially valid dataset, and then save the CourseSections to data", function () {
+        const id: string = "someInvalid";
+        const item: Dataset =  new Dataset(id, datasets[id]);
+        const futureResult: Promise<boolean> = item.sections.
+        then((val) => {
+             return saveToData(id, val);
+        });
+        return expect(futureResult).eventually.deep.equal(true);
     });
 });
 

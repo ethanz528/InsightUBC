@@ -1,13 +1,11 @@
-import {CourseSection} from "./courseSection";
+import {CourseSection} from "./CourseSection";
 import * as JSZip from "jszip";
+import {isJSON} from "./FileValidator";
 
 export let generateCourseSecList = function (content: string): Promise<CourseSection[]> {
     return loadFromContent(content).
-    then((val) => {
-       return createParsedList(val);
-    }).then((val) => {
-        return transformToCourseObj(val);
-    });
+    then((val) => {return createParsedList(val); }).
+    then((val) => {return transformToCourseObj(val); });
 };
 
 export let loadFromContent = function (c: string): Promise<string[]> {
@@ -25,8 +23,10 @@ export let loadFromContent = function (c: string): Promise<string[]> {
 let createParsedList = function (list: string[]): JSON[] {
     let parsedList: JSON[] = [];
     for (const item of list) {
-        const obj = JSON.parse(item);
-        parsedList.push(obj);
+        if (isJSON(item)) {
+            const obj = JSON.parse(item);
+            parsedList.push(obj);
+        }
     }
     return parsedList;
 };
@@ -73,5 +73,5 @@ let shouldBeSkipped = function (dept: string, id: string, avg: number, ins: stri
 };
 
 let checkKey = function (key: string | number): boolean {
-    return key === undefined || key === null; // || key === "";
+    return key === undefined || key === null;
 };

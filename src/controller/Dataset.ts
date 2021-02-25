@@ -1,5 +1,5 @@
-import {CourseSection} from "./courseSection";
-import {generateCourseSecList} from "./datasetHelper";
+import {CourseSection} from "./CourseSection";
+import {generateCourseSecList} from "./DatasetHelper";
 
 export class Dataset {
 
