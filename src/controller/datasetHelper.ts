@@ -73,5 +73,5 @@ let shouldBeSkipped = function (dept: string, id: string, avg: number, ins: stri
 };
 
 let checkKey = function (key: string | number): boolean {
-    return key === undefined || key === null || key === "";
+    return key === undefined || key === null; // || key === "";
 };

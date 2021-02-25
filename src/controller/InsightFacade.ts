@@ -13,9 +13,8 @@ import Q = require("./Query");
  */
 export default class InsightFacade implements IInsightFacade {
 
-    private addedDatasets: Dataset[] = [];
+    private addedDatasets: { [id: string]: Dataset } = {};
     private idList: string[] = [];
-    private testIdList: string[] = ["courses", "otherCourses"];
 
     constructor() {
         Log.trace("InsightFacadeImpl::init()");
@@ -37,7 +36,7 @@ export default class InsightFacade implements IInsightFacade {
             if (val) {
                 newDataset = new Dataset(id, content);
                 this.idList.push(id);
-                this.addedDatasets.push(newDataset);
+                this.addedDatasets[id] = newDataset;
                 return Promise.resolve(this.idList);
             } else {
                 return Promise.reject(new InsightError("File invalid, not in Zip, courses folder not in root " +
@@ -60,15 +59,17 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public performQuery(query: any): Promise<any[]> {
-        let q = new Q(query, this.addedDatasets, this.testIdList);
+        let q = new Q(query, this.addedDatasets, this.idList);
+        let data: any[];
         try {
-            q.performQuery();
+            data = q.performQuery();
         } catch (error) {
             if ((error instanceof InsightError) || (error instanceof ResultTooLargeError)) {
                 return Promise.reject(error);
             }
         }
-        return Promise.reject("Not implemented.");
+        return Promise.resolve(data);
+        // return Promise.reject("Not implemented.");
     }
 
     public listDatasets(): Promise<InsightDataset[]> {
