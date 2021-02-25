@@ -1,9 +1,10 @@
 import Log from "../Util";
 import {IInsightFacade, InsightDataset, InsightDatasetKind} from "./IInsightFacade";
-import {InsightError, NotFoundError} from "./IInsightFacade";
+import {InsightError, NotFoundError, ResultTooLargeError} from "./IInsightFacade";
 import {isIdInvalid} from "./idChecker";
 import {Dataset} from "./dataset";
 import {isFileValid} from "./fileValidator";
+import Q = require("./Query");
 
 /**
  * This is the main programmatic entry point for the project.
@@ -14,6 +15,7 @@ export default class InsightFacade implements IInsightFacade {
 
     private addedDatasets: Dataset[] = [];
     private idList: string[] = [];
+    private testIdList: string[] = ["courses", "otherCourses"];
 
     constructor() {
         Log.trace("InsightFacadeImpl::init()");
@@ -58,6 +60,14 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public performQuery(query: any): Promise<any[]> {
+        let q = new Q(query, this.addedDatasets, this.testIdList);
+        try {
+            q.performQuery();
+        } catch (error) {
+            if ((error instanceof InsightError) || (error instanceof ResultTooLargeError)) {
+                return Promise.reject(error);
+            }
+        }
         return Promise.reject("Not implemented.");
     }
 
