@@ -1,9 +1,9 @@
 import Log from "../Util";
 import {IInsightFacade, InsightDataset, InsightDatasetKind} from "./IInsightFacade";
 import {InsightError, NotFoundError, ResultTooLargeError} from "./IInsightFacade";
-import {isIdInvalid} from "./idChecker";
-import {Dataset} from "./dataset";
-import {isFileValid} from "./fileValidator";
+import {isIdInvalid} from "./IdChecker";
+import {Dataset} from "./Dataset";
+import {isFileValid} from "./FileValidator";
 import Q = require("./Query");
 
 /**
@@ -13,14 +13,14 @@ import Q = require("./Query");
  */
 export default class InsightFacade implements IInsightFacade {
 
-    private addedDatasets: { [id: string]: Dataset } = {};
+    // TESTING; REMOVE LATER
+    public addedDatasets: { [id: string]: Dataset } = {};
     private idList: string[] = [];
 
     constructor() {
         Log.trace("InsightFacadeImpl::init()");
     }
 
-    // test submit
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
         let newDataset: Dataset;
         if (this.idList.some((item: string) => {
@@ -44,15 +44,6 @@ export default class InsightFacade implements IInsightFacade {
                     "directory, or no course files in JSON. Dataset NOT added."));
             }
         });
-        /*if (!isFileValid(content)) {
-            return Promise.reject(new InsightError("File invalid, not in Zip, courses folder not in root " +
-                "directory, or no course files in JSON. Dataset NOT added."));
-        } else {
-            newDataset = new Dataset(id, content);
-            this.idList.push(id);
-            this.addedDatasets.push(newDataset);
-            return Promise.resolve(this.idList);
-        }*/
     }
 
     public removeDataset(id: string): Promise<string> {

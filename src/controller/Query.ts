@@ -1,5 +1,5 @@
 import {InsightError, ResultTooLargeError} from "./IInsightFacade";
-import {Dataset} from "./dataset";
+import {Dataset} from "./Dataset";
 
 class Query {
     private readonly query: any;
