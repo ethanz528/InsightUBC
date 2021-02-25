@@ -3,6 +3,7 @@ import {IInsightFacade, InsightDataset, InsightDatasetKind} from "./IInsightFaca
 import {InsightError, NotFoundError, ResultTooLargeError} from "./IInsightFacade";
 import {isIdInvalid} from "./idChecker";
 import {Dataset} from "./dataset";
+import {isFileValid} from "./fileValidator";
 import Q = require("./Query");
 
 /**
@@ -21,14 +22,36 @@ export default class InsightFacade implements IInsightFacade {
 
     public addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
         let newDataset: Dataset;
+        if (this.idList.some((item: string) => {
+             return item === id;
+        })) {
+            return Promise.reject(new InsightError("ID already added. Dataset NOT added"));
+        }
         if (isIdInvalid(id)) {
             return Promise.reject(new InsightError("ID invalid, contains underscore OR is only white space," +
                 "dataset NOT added."));
         }
-        newDataset = new Dataset(id, content);
-        this.idList.push(id);
-        this.addedDatasets[id] = newDataset;
-        return Promise.resolve(this.idList);
+        return isFileValid(content).
+        then((val) => {
+            if (val) {
+                newDataset = new Dataset(id, content);
+                this.idList.push(id);
+                this.addedDatasets[id] = newDataset;
+                return Promise.resolve(this.idList);
+            } else {
+                return Promise.reject(new InsightError("File invalid, not in Zip, courses folder not in root " +
+                    "directory, or no course files in JSON. Dataset NOT added."));
+            }
+        });
+        /*if (!isFileValid(content)) {
+            return Promise.reject(new InsightError("File invalid, not in Zip, courses folder not in root " +
+                "directory, or no course files in JSON. Dataset NOT added."));
+        } else {
+            newDataset = new Dataset(id, content);
+            this.idList.push(id);
+            this.addedDatasets.push(newDataset);
+            return Promise.resolve(this.idList);
+        }*/
     }
 
     public removeDataset(id: string): Promise<string> {
