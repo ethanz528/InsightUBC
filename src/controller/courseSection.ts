@@ -1,5 +1,3 @@
-import {InsightDatasetKind} from "./IInsightFacade";
-
 export class CourseSection {
 
     public dept: string;

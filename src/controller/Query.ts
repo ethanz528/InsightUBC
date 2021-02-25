@@ -2,7 +2,7 @@ import {InsightError, ResultTooLargeError} from "./IInsightFacade";
 import {Dataset} from "./dataset";
 
 class Query {
-    private query: any;
+    private readonly query: any;
     private datasets: { [id: string]: Dataset };
     private idList: string[];
     private columnKeys: string[] = [];
@@ -27,6 +27,7 @@ class Query {
     }
 
     private performQueryHelper() {
+        this.datasets[this.datasetId].create();
         this.listOfSections = this.datasets[this.datasetId].listOfSections;
         this.data = this["WHERE"](this.query["WHERE"]);
         if (this.data.length > 5000) {
@@ -157,17 +158,14 @@ class Query {
     }
 
     public ANDTest(query: any) {
-        if (!(query instanceof Array)
-            || query.length === 0
-            || !(this.allFilters(query))) {
-            throw new InsightError();
-        }
-        for (const key of query) {
-            this[(Object.keys(key)[0] + "Test") as keyof Query](Object.values(key)[0]);
-        }
+        this["ANDORTest"](query);
     }
 
     public ORTest(query: any) {
+        this["ANDORTest"](query);
+    }
+
+    public ANDORTest(query: any) {
         if (!(query instanceof Array)
             || query.length === 0
             || !(this.allFilters(query))) {
