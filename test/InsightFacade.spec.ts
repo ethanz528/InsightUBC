@@ -232,7 +232,6 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
         const id: string = "courses";
         const id2: string = "invalidJSON";
         const expected: string[] = [id];
-        const expected2: string[] = [id, id2];
         let futureResult: Promise<string[]> =
             insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
         return expect(futureResult).to.eventually.deep.equal(expected).
