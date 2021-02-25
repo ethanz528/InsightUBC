@@ -1,0 +1,20 @@
+{
+    "title": "test EQ",
+    "query": {
+        "WHERE": {
+            "EQ": {
+                "courses_avg": 67
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_id",
+                "courses_avg"
+            ],
+            "ORDER": "courses_dept"
+        }
+    },
+    "isQueryValid": true,
+    "result": [{"courses_dept":"apbi","courses_id":"351","courses_avg":67},{"courses_dept":"apbi","courses_id":"351","courses_avg":67},{"courses_dept":"apbi","courses_id":"351","courses_avg":67},{"courses_dept":"apbi","courses_id":"351","courses_avg":67},{"courses_dept":"busi","courses_id":"451","courses_avg":67},{"courses_dept":"busi","courses_id":"441","courses_avg":67},{"courses_dept":"busi","courses_id":"441","courses_avg":67},{"courses_dept":"chem","courses_id":"311","courses_avg":67},{"courses_dept":"chem","courses_id":"311","courses_avg":67},{"courses_dept":"cogs","courses_id":"200","courses_avg":67},{"courses_dept":"engl","courses_id":"321","courses_avg":67},{"courses_dept":"engl","courses_id":"227","courses_avg":67},{"courses_dept":"fnh","courses_id":"430","courses_avg":67},{"courses_dept":"fnh","courses_id":"430","courses_avg":67},{"courses_dept":"geob","courses_id":"270","courses_avg":67},{"courses_dept":"ital","courses_id":"202","courses_avg":67},{"courses_dept":"japn","courses_id":"100","courses_avg":67},{"courses_dept":"phys","courses_id":"170","courses_avg":67},{"courses_dept":"poli","courses_id":"310","courses_avg":67},{"courses_dept":"poli","courses_id":"310","courses_avg":67},{"courses_dept":"psyc","courses_id":"320","courses_avg":67},{"courses_dept":"rmst","courses_id":"222","courses_avg":67},{"courses_dept":"rmst","courses_id":"222","courses_avg":67},{"courses_dept":"scie","courses_id":"113","courses_avg":67},{"courses_dept":"spph","courses_id":"536","courses_avg":67},{"courses_dept":"spph","courses_id":"536","courses_avg":67}]
+}

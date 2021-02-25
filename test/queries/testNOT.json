@@ -1,0 +1,22 @@
+{
+    "title": "test NOT",
+    "query": {
+        "WHERE": {
+            "NOT": {
+                "LT": {
+                    "courses_audit": 20
+                }
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_id",
+                "courses_audit"
+            ],
+            "ORDER": "courses_audit"
+        }
+    },
+    "isQueryValid": true,
+    "result":[{"courses_dept":"rhsc","courses_id":"507","courses_audit":20},{"courses_dept":"rhsc","courses_id":"501","courses_audit":21},{"courses_dept":"cpsc","courses_id":"540","courses_audit":21},{"courses_dept":"rhsc","courses_id":"501","courses_audit":23}]
+}

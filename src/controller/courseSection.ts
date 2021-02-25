@@ -1,3 +1,5 @@
+import {InsightDatasetKind} from "./IInsightFacade";
+
 export class CourseSection {
 
     public dept: string;
@@ -23,5 +25,20 @@ export class CourseSection {
         this.audit = audit;
         this.uuid = uuid;
         this.year = year;
+    }
+
+    public makeDict(id: string) {
+        let dict: { [id: string]: string | number } = {};
+        dict[id + "_dept"] = this.dept;
+        dict[id + "_id"] = this.id;
+        dict[id + "_avg"] = this.avg;
+        dict[id + "_instructor"] = this.instructor;
+        dict[id + "_title"] = this.titleOfCourse;
+        dict[id + "_pass"] = this.pass;
+        dict[id + "_fail"] = this.fail;
+        dict[id + "_audit"] = this.audit;
+        dict[id + "_uuid"] = this.uuid;
+        dict[id + "_year"] = this.year;
+        return dict;
     }
 }
