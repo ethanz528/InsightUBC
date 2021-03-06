@@ -34,7 +34,7 @@ export default class InsightFacade implements IInsightFacade {
         return isFileValid(content).
         then((val) => {
             if (val) {
-                newDataset = new Dataset(id, content);
+                newDataset = new Dataset(id, kind, content);
                 this.idList.push(id);
                 this.addedDatasets[id] = newDataset;
                 return Promise.resolve(this.idList);
@@ -71,7 +71,6 @@ export default class InsightFacade implements IInsightFacade {
             }
         }
         return Promise.resolve(data);
-        // return Promise.reject("Not implemented.");
     }
 
     public listDatasets(): Promise<InsightDataset[]> {

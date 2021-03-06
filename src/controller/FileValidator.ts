@@ -26,7 +26,9 @@ export let isFileValid = function (content: string): Promise<boolean> {
 export let isValidZip = function (content: string): Promise<boolean> {
     let zip = new JSZip();
     return zip.loadAsync(content, {base64: true}).
-    then(() => {return true; }).
+    then(() => {
+        return true;
+    }).
     catch((val: any) => {
         return false;
     });

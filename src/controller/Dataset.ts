@@ -1,16 +1,19 @@
 import {CourseSection} from "./CourseSection";
 import {generateCourseSecList} from "./DatasetHelper";
+import {InsightDatasetKind} from "./IInsightFacade";
 
 export class Dataset {
 
     public id: string;
+    public kind: InsightDatasetKind;
     public content: string;
     public sections: Promise<CourseSection[]>;
     public listOfCourseSections: CourseSection[];
     public listOfSections: any[];
 
-    constructor(id: string, content: string) {
+    constructor(id: string, kind: InsightDatasetKind, content: string) {
         this.id = id;
+        this.kind = kind;
         this.content = content;
         this.sections = generateCourseSecList(this.content);
         this.sections.then((s) => {

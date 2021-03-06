@@ -1,5 +1,6 @@
 import {InsightError, ResultTooLargeError} from "./IInsightFacade";
 import {Dataset} from "./Dataset";
+import QTT = require("./QueryTestt");
 
 class Query {
     private readonly query: any;
@@ -21,7 +22,11 @@ class Query {
     }
 
     public performQuery() {
-        this.performQueryTest();
+        let qtt = new QTT(this.query, this.datasets, this.idList);
+        qtt.performQueryTest();
+        this.columnKeys = qtt.columnKeys;
+        this.datasetId = qtt.datasetId;
+        this.sortingKey = qtt.sortingKey;
         this.performQueryHelper();
         return this.data;
     }
@@ -94,9 +99,28 @@ class Query {
     public IS(query: any) {
         let key: string = Object.keys(query)[0];
         let constraint: any = Object.values(query)[0];
-        return this.listOfSections.filter((section: any) => {
-            return section[key] === constraint;
-        });
+        if (constraint.charAt(0) === "*" && constraint.charAt(constraint.length - 1) === "*") {
+            constraint = constraint.slice(1, -1);
+            return this.listOfSections.filter((section: any) => {
+                return section[key].includes(constraint);
+            });
+        } else if (constraint.charAt(0) === "*") {
+            constraint = constraint.slice(1);
+            let s: any = constraint.length;
+            return this.listOfSections.filter((section: any) => {
+                return section[key].slice(-s) === constraint;
+            });
+        } else if (constraint.charAt(constraint.length - 1) === "*") {
+            constraint = constraint.slice(0, -1);
+            let s: any = constraint.length;
+            return this.listOfSections.filter((section: any) => {
+                return section[key].slice(0, s) === constraint;
+            });
+        } else {
+            return this.listOfSections.filter((section: any) => {
+                return section[key] === constraint;
+            });
+        }
     }
 
     public NOT(query: any) {
@@ -131,165 +155,6 @@ class Query {
 
     public ORDER(query: any) {
         this.data = this.data.sort((a, b) => (a[this.sortingKey] > b[this.sortingKey]) ? 1 : -1);
-    }
-
-    public performQueryTest() {
-        if (this.query.constructor !== Object
-            || Object.keys(this.query).length !== 2
-            || !(this.query.hasOwnProperty("WHERE"))
-            || !(this.query.hasOwnProperty("OPTIONS"))) {
-            throw new InsightError();
-        }
-        this["OPTIONSTest"](this.query["OPTIONS"]);
-        this["WHERETest"](this.query["WHERE"]);
-    }
-
-    public WHERETest(query: any) {
-        if (query.constructor !== Object
-            || Object.keys(query).length > 1
-            || (Object.keys(query).length === 1 && !(this.FILTERS.includes(Object.keys(query)[0])))) {
-            throw new InsightError();
-        }
-        for (const key in query) {
-            if (query.hasOwnProperty(key)) {
-                this[(key + "Test") as keyof Query](query[key]);
-            }
-        }
-    }
-
-    public ANDTest(query: any) {
-        this["ANDORTest"](query);
-    }
-
-    public ORTest(query: any) {
-        this["ANDORTest"](query);
-    }
-
-    public ANDORTest(query: any) {
-        if (!(query instanceof Array)
-            || query.length === 0
-            || !(this.allFilters(query))) {
-            throw new InsightError();
-        }
-        for (const key of query) {
-            this[(Object.keys(key)[0] + "Test") as keyof Query](Object.values(key)[0]);
-        }
-    }
-
-    public LTTest(query: any) {
-        if (query.constructor !== Object
-            || Object.keys(query).length !== 1
-            || !(this.isMKey(Object.keys(query)[0]))
-            || !(Number.isInteger(Object.values(query)[0] as number))) {
-            throw new InsightError();
-        }
-    }
-
-    public GTTest(query: any) {
-        if (query.constructor !== Object
-            || Object.keys(query).length !== 1
-            || !(this.isMKey(Object.keys(query)[0]))
-            || !(Number.isInteger(Object.values(query)[0] as number))) {
-            throw new InsightError();
-        }
-    }
-
-    public EQTest(query: any) {
-        if (query.constructor !== Object
-            || Object.keys(query).length !== 1
-            || !(this.isMKey(Object.keys(query)[0]))
-            || !(Number.isInteger(Object.values(query)[0] as number))) {
-            throw new InsightError();
-        }
-    }
-
-    public ISTest(query: any) {
-        if (query.constructor !== Object
-            || Object.keys(query).length !== 1
-            || !(this.isSKey(Object.keys(query)[0]))
-            || !(typeof Object.values(query)[0] === "string")
-            || (Object.values(query)[0] as string).split("*").length > 3
-            || (((((Object.values(query)[0] as string).charAt(0) === "*") as unknown) as number)
-                + ((((Object.values(query)[0] as string).charAt(
-                    (Object.values(query)[0] as any[]).length - 1) === "*") as unknown) as number)
-                < (Object.values(query)[0] as string).split("*").length - 1)) {
-            throw new InsightError();
-        }
-    }
-
-    public NOTTest(query: any) {
-        if (query.constructor !== Object
-            || Object.keys(query).length !== 1
-            || !(this.FILTERS.includes(Object.keys(query)[0]))) {
-            throw new InsightError();
-        }
-        for (const key in query) {
-            if (query.hasOwnProperty(key)) {
-                this[(key + "Test") as keyof Query](query[key]);
-            }
-        }
-    }
-
-    public OPTIONSTest(query: any) {
-        if (query.constructor !== Object ||
-            Object.keys(query).length > 2 ||
-            !(query.hasOwnProperty("COLUMNS")) ||
-            (Object.keys(query).length === 2 && !(query.hasOwnProperty("ORDER")))) {
-            throw new InsightError();
-        }
-        for (const key in query) {
-            if (query.hasOwnProperty(key)) {
-                this[(key + "Test") as keyof Query](query[key]);
-            }
-        }
-    }
-
-    public COLUMNSTest(query: any) {
-        if (!(query instanceof Array)
-            || query.length === 0) {
-            throw new InsightError();
-        }
-        this.datasetId = query[0].split("_")[0];
-        for (const key of query) {
-            if (!(this.isKey(key))
-                || !(this.idList.includes(key.slice(0, key.indexOf("_"))))
-                || (!(this.MFIELDS.includes(key.split("_")[1])) && !(this.SFIELDS.includes(key.split("_")[1])))) {
-                throw new InsightError();
-            }
-            this.columnKeys.push(key);
-        }
-    }
-
-    public ORDERTest(query: any) {
-        if (!(this.columnKeys.includes(query))) {
-            throw new InsightError();
-        }
-        this.sortingKey = query;
-    }
-
-    private allFilters(query: any): boolean {
-        for (const key of query) {
-            if (!(this.FILTERS.includes(Object.keys(key)[0]))) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private isMKey(key: any): boolean {
-        return (this.isKey(key))
-            && (this.MFIELDS.includes(key.split("_")[1]));
-    }
-
-    private isSKey(key: any): boolean {
-        return (this.isKey(key))
-            && (this.SFIELDS.includes(key.split("_")[1]));
-    }
-
-    private isKey(key: any): boolean {
-        return !(key.split("_").length !== 2)
-            && !(key.charAt(0) === "_")
-            && (this.datasetId === key.split("_")[0]);
     }
 
 }

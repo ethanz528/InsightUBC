@@ -1,0 +1,20 @@
+{
+    "title": "test IS with two asterisks",
+    "query": {
+        "WHERE": {
+            "IS": {
+                "courses_title": "* the *"
+            }
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "courses_dept",
+                "courses_id",
+                "courses_title"
+            ],
+            "ORDER": "courses_title"
+        }
+    },
+    "isQueryValid": true,
+    "result":[{"courses_dept":"biol","courses_id":"530","courses_title":"biol of the cell"},{"courses_dept":"biol","courses_id":"530","courses_title":"biol of the cell"},{"courses_dept":"biol","courses_id":"530","courses_title":"biol of the cell"},{"courses_dept":"biol","courses_id":"530","courses_title":"biol of the cell"},{"courses_dept":"biol","courses_id":"530","courses_title":"biol of the cell"},{"courses_dept":"biol","courses_id":"530","courses_title":"biol of the cell"},{"courses_dept":"biol","courses_id":"530","courses_title":"biol of the cell"},{"courses_dept":"biol","courses_id":"530","courses_title":"biol of the cell"},{"courses_dept":"biol","courses_id":"530","courses_title":"biol of the cell"},{"courses_dept":"biol","courses_id":"530","courses_title":"biol of the cell"},{"courses_dept":"biol","courses_id":"530","courses_title":"biol of the cell"},{"courses_dept":"biol","courses_id":"530","courses_title":"biol of the cell"},{"courses_dept":"biol","courses_id":"530","courses_title":"biol of the cell"},{"courses_dept":"biol","courses_id":"530","courses_title":"biol of the cell"},{"courses_dept":"biol","courses_id":"530","courses_title":"biol of the cell"},{"courses_dept":"biol","courses_id":"530","courses_title":"biol of the cell"},{"courses_dept":"biol","courses_id":"530","courses_title":"biol of the cell"},{"courses_dept":"biol","courses_id":"530","courses_title":"biol of the cell"},{"courses_dept":"biol","courses_id":"530","courses_title":"biol of the cell"},{"courses_dept":"biol","courses_id":"530","courses_title":"biol of the cell"},{"courses_dept":"jrnl","courses_id":"533","courses_title":"ethics & the law"},{"courses_dept":"jrnl","courses_id":"533","courses_title":"ethics & the law"},{"courses_dept":"jrnl","courses_id":"533","courses_title":"ethics & the law"},{"courses_dept":"jrnl","courses_id":"533","courses_title":"ethics & the law"},{"courses_dept":"jrnl","courses_id":"533","courses_title":"ethics & the law"},{"courses_dept":"jrnl","courses_id":"533","courses_title":"ethics & the law"},{"courses_dept":"jrnl","courses_id":"533","courses_title":"ethics & the law"},{"courses_dept":"jrnl","courses_id":"533","courses_title":"ethics & the law"},{"courses_dept":"jrnl","courses_id":"533","courses_title":"ethics & the law"},{"courses_dept":"jrnl","courses_id":"533","courses_title":"ethics & the law"},{"courses_dept":"jrnl","courses_id":"533","courses_title":"ethics & the law"},{"courses_dept":"jrnl","courses_id":"533","courses_title":"ethics & the law"},{"courses_dept":"ufor","courses_id":"100","courses_title":"green the city"},{"courses_dept":"ufor","courses_id":"100","courses_title":"green the city"},{"courses_dept":"mine","courses_id":"486","courses_title":"min & the env"},{"courses_dept":"mine","courses_id":"486","courses_title":"min & the env"},{"courses_dept":"mine","courses_id":"486","courses_title":"min & the env"},{"courses_dept":"mine","courses_id":"486","courses_title":"min & the env"},{"courses_dept":"mine","courses_id":"486","courses_title":"min & the env"},{"courses_dept":"mine","courses_id":"486","courses_title":"min & the env"},{"courses_dept":"mine","courses_id":"486","courses_title":"min & the env"},{"courses_dept":"mine","courses_id":"486","courses_title":"min & the env"},{"courses_dept":"mine","courses_id":"486","courses_title":"min & the env"},{"courses_dept":"mine","courses_id":"486","courses_title":"min & the env"},{"courses_dept":"mine","courses_id":"486","courses_title":"min & the env"},{"courses_dept":"mine","courses_id":"486","courses_title":"min & the env"}]
+}
