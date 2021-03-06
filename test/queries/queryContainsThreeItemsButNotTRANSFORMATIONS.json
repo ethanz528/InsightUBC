@@ -1,5 +1,5 @@
 {
-    "title": "Query contains more than two items",
+    "title": "Query contains three items but does not contain TRANSFORMATIONS",
     "query": {
         "WHERE": {
             "OR": [

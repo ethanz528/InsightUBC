@@ -1,5 +1,5 @@
 {
-    "title": "test EQ",
+    "title": "test OR",
     "query": {
         "WHERE": {
             "OR": [
