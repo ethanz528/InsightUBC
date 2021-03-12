@@ -1,5 +1,5 @@
 import {CourseSection} from "./CourseSection";
-import {generateCourseSecList} from "./DatasetHelper";
+import {generateCourseSecList} from "./CourseHelper";
 import {InsightDatasetKind} from "./IInsightFacade";
 
 export class Dataset {

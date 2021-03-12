@@ -1,7 +1,9 @@
 import {CourseSection} from "./CourseSection";
 import * as fs from "fs";
 
-const cacheDir = process.cwd() + "/data";
+const cacheDir = "data";
+
+// TODO
 
 export let saveToData = function (fileId: string, item: CourseSection[]): boolean {
     try {

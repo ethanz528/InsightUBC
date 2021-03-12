@@ -10,6 +10,12 @@ import {isIdInvalid} from "../src/controller/IdChecker";
 import {atLeastOneJSON, isRootDirCourses, isValidZip} from "../src/controller/FileValidator";
 import {saveToData} from "../src/controller/SaveAndLoad";
 import {Dataset} from "../src/controller/Dataset";
+import {
+    extractFilePaths,
+    loadIndexInString,
+    retrieveBuildingTable,
+    stringToJsonTree
+} from "../src/controller/SpaceHelper";
 
 // This extends chai with assertions that natively support Promises
 chai.use(chaiAsPromised);
@@ -41,6 +47,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
         noSections: "./test/data/no_sections.zip",
         notCourses: "./test/data/not_courses.zip",
         someInvalid: "./test/data/some_invalid.zip",
+        rooms: "./test/data/rooms.zip"
     };
     let datasets: { [id: string]: string } = {};
     let insightFacade: InsightFacade;
@@ -342,6 +349,65 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
              return saveToData(id, val);
         });
         return expect(futureResult).eventually.deep.equal(true);
+    });
+    // ****
+    // ******
+    // loadIndexInString test
+    // ******
+    // ****
+    /*it("Should find index.htm in the given zip file, and return the contents inside in string form",
+        function () {
+        const id: string = "rooms";
+        const futureResult: Promise<string> = loadIndexInString(datasets[id]);
+        return expect(futureResult).to.eventually.deep.equal(" a ");
+    });*/
+    // ****
+    // ******
+    // stringToJsonTree test
+    // ******
+    // ****
+    /*it("Should transform given html string to a JSON object that has a tree structure", function () {
+        const id: string = "rooms";
+        const futureResult: Promise<JSON> = loadIndexInString(datasets[id]).
+        then((val): JSON => {
+            return stringToJsonTree(val);
+        });
+        return expect(futureResult).to.eventually.deep.equal("");
+    });*/
+    // ****
+    // ******
+    // retrieveBuildingTable test
+    // ******
+    // ****
+    it("Should return the table in JSON form containing building indices", function () {
+        const id: string = "rooms";
+        const futureResult: Promise<JSON|boolean> = loadIndexInString(datasets[id]).
+        then((val): JSON => {
+            return stringToJsonTree(val);
+        }).
+        then((val) => {
+            return retrieveBuildingTable(val);
+        });
+        return expect(futureResult).eventually.deep.equal(" ");
+    });
+    // ****
+    // ******
+    // retrieveBuildingTable test
+    // ******
+    // ****
+    it("Should return the file paths in string form, in list, from building table tree", function () {
+        const id: string = "rooms";
+        const futureResult: Promise<string[]> = loadIndexInString(datasets[id]).
+        then((val): JSON => {
+            return stringToJsonTree(val);
+        }).
+        then((val) => {
+            return retrieveBuildingTable(val);
+        }).
+        then((val) => {
+            return extractFilePaths(val);
+        });
+        return expect(futureResult).eventually.deep.equal(" ");
     });
 });
 
