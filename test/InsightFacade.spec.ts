@@ -354,6 +354,7 @@ describe("InsightFacade PerformQuery", () => {
     const datasetsToQuery: { [id: string]: {path: string, kind: InsightDatasetKind} } = {
         courses: {path: "./test/data/courses.zip", kind: InsightDatasetKind.Courses},
         otherCourses: {path: "./test/data/otherCourses.zip", kind: InsightDatasetKind.Courses},
+        rooms: {path: "./test/data/otherCourses.zip", kind: InsightDatasetKind.Rooms}
     };
     let insightFacade: InsightFacade;
     let testQueries: ITestQuery[] = [];

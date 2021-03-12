@@ -13,7 +13,7 @@ import Q = require("./Query");
  */
 export default class InsightFacade implements IInsightFacade {
 
-    private addedDatasets: { [id: string]: Dataset } = {};
+    private addedDatasets: { [id: string]: Dataset } = { };
     private idList: string[] = [];
 
     constructor() {
