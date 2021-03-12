@@ -1,0 +1,27 @@
+{
+    "title": "COLUMN contains APPLYKEY but GROUP not present",
+    "query": {
+        "WHERE": {
+            "AND": [{
+                "IS": {
+                    "rooms_furniture": "*Tables*"
+                }
+            }, {
+                "GT": {
+                    "rooms_seats": 300
+                }
+            }]
+        },
+        "OPTIONS": {
+            "COLUMNS": [
+                "rooms_shortname"
+            ],
+            "ORDER": {
+                "dir": "DOWN",
+                "keys": ["maxSeats"]
+            }
+        }
+    },
+    "isQueryValid": false,
+    "result": "InsightError"
+}

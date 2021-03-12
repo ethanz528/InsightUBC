@@ -1,13 +1,13 @@
-import {InsightError, ResultTooLargeError} from "./IInsightFacade";
+import {InsightDatasetKind, ResultTooLargeError} from "./IInsightFacade";
 import {Dataset} from "./Dataset";
-import QTT = require("./QueryTestt");
+import QTT = require("./QueryTest");
 
 class Query {
     private readonly query: any;
     private datasets: { [id: string]: Dataset };
     private idList: string[];
     private columnKeys: string[] = [];
-    private datasetId: string;
+    private dataset: Dataset;
     private sortingKey: string;
     private listOfSections: any[];
     private data: any[];
@@ -22,18 +22,21 @@ class Query {
     }
 
     public performQuery() {
-        let qtt = new QTT(this.query, this.datasets, this.idList);
-        qtt.performQueryTest();
+        let qtt = new QTT(this.datasets, this.idList);
+        qtt.performQueryTest(this.query);
         this.columnKeys = qtt.columnKeys;
-        this.datasetId = qtt.datasetId;
+        this.dataset = qtt.dataset;
         this.sortingKey = qtt.sortingKey;
+        if (this.dataset.kind === InsightDatasetKind.Rooms) {
+            return [];
+        }
         this.performQueryHelper();
         return this.data;
     }
 
     private performQueryHelper() {
-        this.datasets[this.datasetId].create();
-        this.listOfSections = this.datasets[this.datasetId].listOfSections;
+        this.dataset.create();
+        this.listOfSections = this.dataset.listOfSections;
         this.data = this["WHERE"](this.query["WHERE"]);
         if (this.data.length > 5000) {
             throw new ResultTooLargeError();
@@ -154,7 +157,7 @@ class Query {
     }
 
     public ORDER(query: any) {
-        this.data = this.data.sort((a, b) => (a[this.sortingKey] > b[this.sortingKey]) ? 1 : -1);
+        this.data.sort((a, b) => (a[this.sortingKey] > b[this.sortingKey]) ? 1 : -1);
     }
 
 }
