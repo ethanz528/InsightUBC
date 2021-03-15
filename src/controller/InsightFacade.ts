@@ -61,10 +61,10 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public performQuery(query: any): Promise<any[]> {
-        let q = new Q(query, this.addedDatasets, this.idList);
+        let q = new Q(this.addedDatasets);
         let data: any[];
         try {
-            data = q.performQuery();
+            data = q.performQuery(query);
         } catch (error) {
             if ((error instanceof InsightError) || (error instanceof ResultTooLargeError)) {
                 return Promise.reject(error);

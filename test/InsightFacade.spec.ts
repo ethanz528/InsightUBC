@@ -90,6 +90,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
     // ****
     // This is a unit test. You should create more like this!
 
+    /*
     it("Should add a valid dataset", function () {
         const id: string = "courses";
         const expected: string[] = [id];
@@ -343,6 +344,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
         });
         return expect(futureResult).eventually.deep.equal(true);
     });
+    */
 });
 
 /*

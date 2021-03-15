@@ -2,25 +2,26 @@ import {InsightDatasetKind, InsightError} from "./IInsightFacade";
 import {Dataset} from "./Dataset";
 
 class QueryTest {
-    private datasets: { [id: string]: Dataset };
-    private idList: string[];
-    public columnKeys: string[] = [];
-    public sortingKey: string;
+    private readonly datasets: { [id: string]: Dataset };
     public dataset: Dataset;
-    public GROUPPresent: boolean;
-    public GROUPKeys: string[];
+    public columnKeys: string[] = [];
+    public sortingKeys: string[];
+    public sortingUP: number = 1;
     private FILTERS: string[] = ["AND", "OR", "LT", "GT", "EQ", "IS", "NOT"];
-    private APPLYTOKENS: any[] = ["MAX", "MIN", "AVG", "COUNT", "SUM"];
-    private APPLYKEYS: string[] = [];
     private MFIELDS: { [id: string]: string[] } = {courses: ["avg", "pass", "fail", "audit", "year"],
         rooms: ["lat", "lon", "seats"]};
 
     private SFIELDS: { [id: string]: string[] } = {courses: ["dept", "id", "instructor", "title", "uuid"],
         rooms: ["fullname", "shortname", "number", "name", "address", "type", "furniture", "href"]};
 
-    constructor(datasets: { [id: string]: Dataset }, idList: string[]) {
+    public GROUPPresent: boolean;
+    public GROUPKeys: string[];
+    public APPLYS: any[];
+    private APPLYKEYS: string[] = [];
+    private APPLYTOKENS: any[] = ["MAX", "MIN", "AVG", "COUNT", "SUM"];
+
+    constructor(datasets: { [id: string]: Dataset }) {
         this.datasets = datasets;
-        this.idList = idList;
     }
 
     public performQueryTest(query: any) {
@@ -30,10 +31,18 @@ class QueryTest {
             || !(query.hasOwnProperty("WHERE"))
             || !(query.hasOwnProperty("OPTIONS"))
             || (Object.keys(query).length === 3 && !(query.hasOwnProperty("TRANSFORMATIONS")))) {
-            // console.log("QUERY");
             throw new InsightError();
         }
         this.GROUPPresent = query.hasOwnProperty("TRANSFORMATIONS");
+        try {
+            if (this.GROUPPresent) {
+                this.dataset = this.datasets[query["TRANSFORMATIONS"]["GROUP"][0].split("_")[0]];
+            } else {
+                this.dataset = this.datasets[query["OPTIONS"]["COLUMNS"][0].split("_")[0]];
+            }
+        } catch (e) {
+                throw new InsightError();
+        }
         if (this.GROUPPresent) {
             this.callMethod("TRANSFORMATIONS", query["TRANSFORMATIONS"]);
         }
@@ -84,184 +93,153 @@ class QueryTest {
     }
 
     public WHERETest(query: any) {
-        if (query.constructor !== Object
+        if (query === null
+            || query.constructor !== Object
             || Object.keys(query).length > 1
-            || (Object.keys(query).length === 1 && !(this.FILTERS.includes(Object.keys(query)[0])))) {
-            // console.log("WHERE");
+            || !(Object.keys(query).every((e) => this.FILTERS.includes(e)))) {
             throw new InsightError();
         }
-        for (const key in query) {
-            if (query.hasOwnProperty(key)) {
-                this.callMethod(key, query[key]);
-                // this[(key + "Test") as keyof QueryTestt](query[key]);
-            }
-        }
+        Object.keys(query).map((e) => this.callMethod(e, query[e]));
     }
 
     public ANDORTest(query: any) {
         if (!(query instanceof Array)
             || query.length === 0
-            || query.some((e) => !(this.FILTERS.includes(Object.keys(e)[0])))) {
-            // console.log("AND OR");
+            || !(query.every((e) => this.FILTERS.includes(Object.keys(e)[0])))) {
             throw new InsightError();
         }
-        for (const key of query) {
-            this.callMethod(Object.keys(key)[0], Object.values(key)[0]);
-            // this[(Object.keys(key)[0] + "Test") as keyof QueryTestt](Object.values(key)[0]);
-        }
+        query.map((e) => this.callMethod(Object.keys(e)[0], Object.values(e)[0]));
     }
 
     public LTGTEQTest(query: any) {
-        if (query.constructor !== Object
+        if (query === null
+            || query.constructor !== Object
             || Object.keys(query).length !== 1
             || !(this.isMKey(Object.keys(query)[0]))
-            || !(Number.isInteger(Object.values(query)[0] as number))) {
-            // console.log("LT GT EQ");
+            || typeof Object.values(query)[0] !== "number") {
             throw new InsightError();
         }
     }
 
     public ISTest(query: any) {
-        if (query.constructor !== Object
+        if (query === null
+            || query.constructor !== Object
             || Object.keys(query).length !== 1
             || !(this.isSKey(Object.keys(query)[0]))
-            || !(typeof Object.values(query)[0] === "string")
+            || typeof Object.values(query)[0] !== "string"
             || (Object.values(query)[0] as string).split("*").length > 3
-            || (((((Object.values(query)[0] as string).charAt(0) === "*") as unknown) as number)
-                + ((((Object.values(query)[0] as string).charAt(
-                    (Object.values(query)[0] as any[]).length - 1) === "*") as unknown) as number)
-                < (Object.values(query)[0] as string).split("*").length - 1)) {
-            // console.log("IS");
+            || (Object.values(query)[0] as string).substring(1,
+                (Object.values(query)[0] as string).length - 1).split("*").length !== 1) {
             throw new InsightError();
         }
     }
 
     public NOTTest(query: any) {
-        if (query.constructor !== Object
+        if (query === null
+            || query.constructor !== Object
             || Object.keys(query).length !== 1
-            || !(this.FILTERS.includes(Object.keys(query)[0]))) {
-            // console.log("NOT");
+            || !(Object.keys(query).every((e) => this.FILTERS.includes(e)))) {
             throw new InsightError();
         }
-        for (const key in query) {
-            if (query.hasOwnProperty(key)) {
-                this.callMethod(key, query[key]);
-                // this[(key + "Test") as keyof QueryTestt](query[key]);
-            }
-        }
+        Object.keys(query).map((e) => this.callMethod(e, query[e]));
     }
 
     public OPTIONSTest(query: any) {
-        if (query.constructor !== Object ||
-            Object.keys(query).length > 2 ||
-            !(query.hasOwnProperty("COLUMNS")) ||
-            (Object.keys(query).length === 2 && !(query.hasOwnProperty("ORDER")))) {
-            // console.log("OPTIONS");
+        if (query === null
+            || query.constructor !== Object
+            || Object.keys(query).length > 2
+            || !(query.hasOwnProperty("COLUMNS"))
+            || (Object.keys(query).length === 2 && !(query.hasOwnProperty("ORDER")))) {
             throw new InsightError();
         }
-        for (const key in query) {
-            if (query.hasOwnProperty(key)) {
-                this.callMethod(key, query[key]);
-                // this[(key + "Test") as keyof QueryTestt](query[key]);
-            }
-        }
+        Object.keys(query).map((e) => this.callMethod(e, query[e]));
     }
 
     public COLUMNSTest(query: any) {
-        if (!(query instanceof Array)
-            || query.length === 0) {
-            // console.log("COLUMNS");
-            throw new InsightError();
-        }
-        if (!(this.GROUPPresent)) {
-            if (!(this.datasets.hasOwnProperty(query[0].split("_")[0]))) {
-                // console.log("COLUMNS");
+        if (this.GROUPPresent) {
+            if (!(query instanceof Array)
+                || query.length === 0
+                || !(query.every((e) => this.GROUPKeys.includes(e) || this.APPLYKEYS.includes(e)))) {
                 throw new InsightError();
             }
-            this.dataset = this.datasets[query[0].split("_")[0]];
-        }
-        this.columnKeys = query;
-        if (!(this.GROUPPresent)) {
-            for (const key of query) {
-                if (!(this.isKey(key))) {
-                    // console.log("COLUMNS");
-                    throw new InsightError();
-                }
+        } else {
+            if (!(query instanceof Array)
+                || query.length === 0
+                || !query.every((e) => this.isKey(e))) {
+                throw new InsightError();
             }
         }
+        this.columnKeys = query;
     }
 
     public ORDERTest(query: any) {
         if (typeof query === "string") {
             if (!(this.columnKeys.includes(query))) {
-                // console.log("ORDER");
                 throw new InsightError();
             }
-            this.sortingKey = query;
+            this.sortingKeys = [query];
         } else {
-            if (query.constructor !== Object
+            if (query === null
+                || query.constructor !== Object
                 || Object.keys(query).length !== 2
                 || !(query.hasOwnProperty("dir"))
                 || !(query["dir"] === "UP" || query["dir"] === "DOWN")
                 || !(query.hasOwnProperty("keys"))
                 || !(query["keys"] instanceof Array)
                 || query["keys"].length === 0
-                || query["keys"].some((e) => !(this.columnKeys.includes(e)))) {
-                    // console.log("ORDER");
+                || !(query["keys"].every((e) => this.columnKeys.includes(e)))) {
                     throw new InsightError();
             }
-            this.sortingKey = "not implemented :P";
+            this.sortingKeys = query["keys"];
+            if (query["dir"] === "DOWN") {
+                this.sortingUP = -1;
+            }
         }
     }
 
     public TRANSFORMATIONSTest(query: any) {
-        if (query.constructor !== Object
+        if (query === null
+            || query.constructor !== Object
             || Object.keys(query).length !== 2
             || !(query.hasOwnProperty("GROUP"))
             || !(query.hasOwnProperty("APPLY"))) {
-            // console.log("TRANSFORMATIONS");
             throw new InsightError();
         }
-        this.callMethod("GROUP", query["GROUP"]);
-        this.callMethod("APPLY", query["APPLY"]);
+        Object.keys(query).map((e) => this.callMethod(e, query[e]));
     }
 
     public GROUPTest(query: any) {
         if (!(query instanceof Array)
-            || query.length === 0) {
-            // console.log("GROUP");
-            throw new InsightError();
-        }
-        this.dataset = this.datasets[query[0].split("_")[0]];
-        if (query.some((e) => !(this.isKey(e)))) {
-            // console.log("GROUP");
+            || query.length === 0
+            || !(query.every((e) => this.isKey(e)))) {
             throw new InsightError();
         }
         this.GROUPKeys = query;
     }
 
     public APPLYTest(query: any) {
-        // console.log(query[0]);
         if (!(query instanceof Array)
             || query.length === 0
-            || query.some((e) => !(this.isApplyRule(e)))) {
-            // console.log("APPLY");
+            || !(query.every((e) => this.isApplyRule(e)))) {
             throw new InsightError();
         }
+        this.APPLYS = query;
     }
 
     private isMKey(key: any): boolean {
-        return key.split("_").length === 2
+        return typeof key === "string"
+            && key.split("_").length === 2
             && key.charAt(0) !== "_"
             && this.dataset.id === key.split("_")[0]
             && this.MFIELDS[this.dataset.kind].includes(key.split("_")[1]);
     }
 
     private isSKey(key: any): boolean {
-        return key.split("_").length === 2
+        return typeof key === "string"
+            && key.split("_").length === 2
             && key.charAt(0) !== "_"
             && this.dataset.id === key.split("_")[0]
-            && (this.SFIELDS[this.dataset.kind].includes(key.split("_")[1]));
+            && this.SFIELDS[this.dataset.kind].includes(key.split("_")[1]);
     }
 
     private isKey(key: any): boolean {
@@ -269,20 +247,22 @@ class QueryTest {
     }
 
     private isApplyRule(e: any) {
-        return e.constructor === Object
+        return e !== null
+            && e.constructor === Object
             && Object.keys(e).length === 1
             && this.isApplyKey(Object.keys(e)[0])
             && this.isApplyRuleValue(Object.values(e)[0]);
     }
 
     private isApplyRuleValue(e: any) {
-        return e.constructor === Object
+        return e !== null
+            && e.constructor === Object
             && Object.keys(e).length === 1
             && ((this.isMKey(Object.values(e)[0]) && this.APPLYTOKENS.includes(Object.keys(e)[0]))
                 || (this.isSKey(Object.values(e)[0]) && Object.keys(e)[0] === "COUNT"));
     }
 
-    private isApplyKey(e: any) {
+    private isApplyKey(e: any): boolean {
         if (this.APPLYKEYS.includes(e)) {
             return false;
         }

@@ -1,47 +1,52 @@
 import {InsightDatasetKind, ResultTooLargeError} from "./IInsightFacade";
 import {Dataset} from "./Dataset";
-import QTT = require("./QueryTest");
+import Decimal from "decimal.js";
+import QT = require("./QueryTest");
 
 class Query {
-    private readonly query: any;
     private datasets: { [id: string]: Dataset };
-    private idList: string[];
     private columnKeys: string[] = [];
     private dataset: Dataset;
-    private sortingKey: string;
+    private sortingKeys: string[];
+    private sortingUP: number;
+    private GROUPPresent: boolean;
+    private GROUPKeys: string[];
+    private APPLYS: any[];
     private listOfSections: any[];
     private data: any[];
-    private FILTERS: string[] = ["AND", "OR", "LT", "GT", "EQ", "IS", "NOT"];
-    private MFIELDS: string[] = ["avg", "pass", "fail", "audit", "year"];
-    private SFIELDS: string[] = ["dept", "id", "instructor", "title", "uuid"];
 
-    constructor(query: any, datasets: { [id: string]: Dataset }, idList: string[]) {
-        this.query = query;
+    constructor(datasets: { [id: string]: Dataset }) {
         this.datasets = datasets;
-        this.idList = idList;
     }
 
-    public performQuery() {
-        let qtt = new QTT(this.datasets, this.idList);
-        qtt.performQueryTest(this.query);
-        this.columnKeys = qtt.columnKeys;
-        this.dataset = qtt.dataset;
-        this.sortingKey = qtt.sortingKey;
+    public performQuery(query: any) {
+        let qt = new QT(this.datasets);
+        qt.performQueryTest(query);
+        this.dataset = qt.dataset;
+        this.columnKeys = qt.columnKeys;
+        this.sortingKeys = qt.sortingKeys;
+        this.sortingUP = qt.sortingUP;
+        this.GROUPPresent = qt.GROUPPresent;
+        this.GROUPKeys = qt.GROUPKeys;
+        this.APPLYS = qt.APPLYS;
         if (this.dataset.kind === InsightDatasetKind.Rooms) {
             return [];
         }
-        this.performQueryHelper();
+        this.performQueryHelper(query);
         return this.data;
     }
 
-    private performQueryHelper() {
+    private performQueryHelper(query: any) {
         this.dataset.create();
         this.listOfSections = this.dataset.listOfSections;
-        this.data = this["WHERE"](this.query["WHERE"]);
+        this.data = this["WHERE"](query["WHERE"]);
+        if (this.GROUPPresent) {
+            this["TRANSFORMATIONS"](query["TRANSFORMATIONS"]);
+        }
         if (this.data.length > 5000) {
             throw new ResultTooLargeError();
         } else {
-            this["OPTIONS"](this.query["OPTIONS"]);
+            this["OPTIONS"](query["OPTIONS"]);
         }
     }
 
@@ -157,9 +162,81 @@ class Query {
     }
 
     public ORDER(query: any) {
-        this.data.sort((a, b) => (a[this.sortingKey] > b[this.sortingKey]) ? 1 : -1);
+        this.data.sort((a, b) => this.sortHelper([a, b]));
     }
 
+    public sortHelper(ab: any) {
+        for (const key of this.sortingKeys) {
+            if (ab[0][key] === ab[1][key]) {
+                // pass
+            } else if (ab[0][key] < ab[1][key]) {
+                return -this.sortingUP;
+            } else {
+                return this.sortingUP;
+            }
+        }
+        return -this.sortingUP;
+    }
+
+    public TRANSFORMATIONS(query: any) {
+        this["GROUP"](query["GROUP"]);
+        this["APPLY"](query["APPLY"]);
+    }
+
+    public GROUP(query: any) {
+        let newData: any[] = [];
+        let flag: boolean;
+        for (const section of this.data) {
+            flag = false;
+            for (const nd of newData) {
+                if (this.GROUPKeys.every((e) => nd[e] === section[e])) {
+                    nd["data"].push(section);
+                    flag = true;
+                    break;
+                }
+            }
+            if (!flag) {
+                let ndd: { [id: string]: any } = { };
+                this.GROUPKeys.map((e) => ndd[e] = section[e]);
+                ndd["data"] = [section];
+                newData.push(ndd);
+            }
+        }
+        this.data = newData;
+    }
+
+    public APPLY(query: any) {
+        for (const applyKey of this.APPLYS) {
+            for (const data of this.data) {
+                data[Object.keys(applyKey)[0]] = this[Object.keys(Object.values(applyKey)[0])[0] as keyof Query]
+                (data["data"].map((e: any) =>  e[Object.values(Object.values(applyKey)[0])[0]]));
+            }
+        }
+    }
+
+    public MAX(query: any): number {
+        return Math.max.apply(null, query);
+    }
+
+    public MIN(query: any): number {
+        return Math.min.apply(null, query);
+    }
+
+    public AVG(query: any): number {
+        let total: Decimal = new Decimal(0);
+        query.every((e: number) => total = Decimal.add(total, new Decimal(e)));
+        return Number((total.toNumber() / query.length).toFixed(2));
+    }
+
+    public COUNT(query: any): number {
+        return (new Set(query)).size;
+    }
+
+    public SUM(query: any): number {
+        let total: Decimal = new Decimal(0);
+        query.every((e: number) => total = Decimal.add(total, new Decimal(e)));
+        return Number(total.toFixed(2));
+    }
 }
 
 export = Query;
