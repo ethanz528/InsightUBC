@@ -379,7 +379,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
     // retrieveBuildingTable test
     // ******
     // ****
-    it("Should return the table in JSON form containing building indices", function () {
+    /*it("Should return the table in JSON form containing building indices", function () {
         const id: string = "rooms";
         const futureResult: Promise<JSON|boolean> = loadIndexInString(datasets[id]).
         then((val): JSON => {
@@ -389,7 +389,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
             return retrieveBuildingTable(val);
         });
         return expect(futureResult).eventually.deep.equal(" ");
-    });
+    });*/
     // ****
     // ******
     // retrieveBuildingTable test
