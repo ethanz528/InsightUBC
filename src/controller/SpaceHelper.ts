@@ -39,11 +39,11 @@ export let retrieveBuildingTable = function (htmlJsonTreeNode: any): JSON | bool
     return tableNode;
 };
 
-// TODO
 // Req: buildingTree must be in JSON form
 // Eff: traverses the buildingTree, extracting all file paths in string form, and returning them in a list
-export let extractFilePaths = function (buildingTree: any): string[] {
+export let extractFilePaths = function (table: any): string[] {
     let filePaths: string[] = [];
+    filePathRecursiveHelp(table, filePaths);
     return filePaths;
 };
 
@@ -83,7 +83,7 @@ let retrieveTbody = function (listOfChildNodes: any): JSON {
 // helper
 // Req: tbody must be in JSON tree format
 // Eff: returns true if the tbody contains at least one row which houses information about buildings, false otherwise
-function containsDataAboutBuildings(tbody: any): boolean {
+let containsDataAboutBuildings = function (tbody: any): boolean {
     const tbodyContent = tbody.childNodes;
     for (const item of tbodyContent) {
         if (atARowAndContainsBuildingInfo(item)) {
@@ -91,7 +91,7 @@ function containsDataAboutBuildings(tbody: any): boolean {
         }
     }
     return false;
-}
+};
 
 // helper
 // Req: tableItem must be in JSON tree format
@@ -114,7 +114,7 @@ let foundBuildingDataInRow = function (rowItem: any): boolean {
             let result = foundBuildingDataInRow(node);
             pathResults.push(result);
         }
-        if (pathResults.indexOf(true)) {
+        if (containsValue(pathResults, true)) {
             return true;
         }
     }
@@ -136,6 +136,50 @@ let verifyRowItem = function (rowItem: any): boolean {
     } else {
         return false;
     }
+};
+
+// helper
+// Eff: returns true if the given array contains value, false otherwise.
+let containsValue = function (list: any[], value: any): boolean {
+    const val: number = list.indexOf(value);
+    const notFoundVal = -1;
+    if (val !== notFoundVal) {
+        return true;
+    } else {
+        return false;
+    }
+};
+
+// helper
+// Req: node must be the tree-like representation of an html table
+// Eff: traverses the table recursively adding all file paths to the given list
+let filePathRecursiveHelp = function (node: any, acc: string[]) {
+    if (nodeContainsFilePath(node)) {
+        const path: string = getPathFromNode(node);
+        if (!containsValue(acc, path)) {
+            acc.push(path);
+        }
+    } else if (atLeastOneExplorableChildNode(node.childNodes)) {
+        for (const child of node.childNodes) {
+            filePathRecursiveHelp(child, acc);
+        }
+    }
+};
+
+// helper
+// Req: node must be an html JSON tree node
+// Eff: returns true if we are at the node with required name, false otherwise
+let nodeContainsFilePath = function (node: any): boolean {
+    const reqName: string = "a";
+    return node.nodeName === reqName;
+};
+
+// helper
+// Req: node must be the "a" node of a JSON html tree, this node must contain attr list of size 2, with first index
+// containing the building "href" along with the path value.
+// Eff: from the a node given, returns the path of the building file.
+let getPathFromNode = function (node: any): string {
+    return node.attrs[0].value;
 };
 
 // helper
