@@ -1,6 +1,7 @@
 
 import * as JSZip from "jszip";
 import has = Reflect.has;
+import {Building} from "./Building";
 
 // Req: the file be available in given path
 // Eff: loads all of index.htm in string form
@@ -39,12 +40,23 @@ export let retrieveBuildingTable = function (htmlJsonTreeNode: any): JSON | bool
     return tableNode;
 };
 
-// Req: buildingTree must be in JSON form
-// Eff: traverses the buildingTree, extracting all file paths in string form, and returning them in a list
-export let extractFilePaths = function (table: any): string[] {
-    let filePaths: string[] = [];
-    filePathRecursiveHelp(table, filePaths);
-    return filePaths;
+// Req: table must be valid html json tree, containing building information
+// Eff: from the json tree, constructs a list buildings.
+export let createListOfBuildings = function (table: any): Building[] {
+    const buildingList: Building[] = [];
+    const tbody = retrieveTbody(table.childNodes);
+    const onlyRows = keepOnlyRowElements(tbody);
+    for (const row of onlyRows) {
+        const dataColumns = row.childNodes;
+        const sn: string = dataColumns[3].childNodes[0].value.trim();
+        const fn: string = dataColumns[5].childNodes[1].childNodes[0].value;
+        const fp: string = dataColumns[5].childNodes[1].attrs[0].value;
+        const ad: string = dataColumns[7].childNodes[0].value.trim();
+        const building = new Building(fn, sn, ad, fp);
+        buildingList.push(building);
+    }
+
+    return buildingList;
 };
 
 // helper
@@ -60,18 +72,14 @@ let isThisTheBuildingTableNode = function (treeNode: any): boolean {
 // Eff: verifies that the body of the table contains information about buildings
 let verifyTbodyContainsBuildingInfo = function (children: any): boolean {
     const tbody = retrieveTbody(children);
-    if (containsDataAboutBuildings(tbody)) {
-        return true;
-    } else {
-        return false;
-    }
+    return containsDataAboutBuildings(tbody);
 
 };
 
 // helper
 // Req: listOfChildNodes must be children of a table node found in JSON tree
 // Eff: returns only the tbody portion of the html table in a JSON tree format
-let retrieveTbody = function (listOfChildNodes: any): JSON {
+let retrieveTbody = function (listOfChildNodes: any): any {
     const targetName: string = "tbody";
     for (const child of listOfChildNodes) {
         if (child.nodeName === targetName) {
@@ -80,6 +88,7 @@ let retrieveTbody = function (listOfChildNodes: any): JSON {
     }
 };
 
+// can be removed entirely
 // helper
 // Req: tbody must be in JSON tree format
 // Eff: returns true if the tbody contains at least one row which houses information about buildings, false otherwise
@@ -143,43 +152,17 @@ let verifyRowItem = function (rowItem: any): boolean {
 let containsValue = function (list: any[], value: any): boolean {
     const val: number = list.indexOf(value);
     const notFoundVal = -1;
-    if (val !== notFoundVal) {
-        return true;
-    } else {
-        return false;
-    }
+    return val !== notFoundVal;
 };
 
 // helper
-// Req: node must be the tree-like representation of an html table
-// Eff: traverses the table recursively adding all file paths to the given list
-let filePathRecursiveHelp = function (node: any, acc: string[]) {
-    if (nodeContainsFilePath(node)) {
-        const path: string = getPathFromNode(node);
-        if (!containsValue(acc, path)) {
-            acc.push(path);
-        }
-    } else if (atLeastOneExplorableChildNode(node.childNodes)) {
-        for (const child of node.childNodes) {
-            filePathRecursiveHelp(child, acc);
-        }
-    }
-};
-
-// helper
-// Req: node must be an html JSON tree node
-// Eff: returns true if we are at the node with required name, false otherwise
-let nodeContainsFilePath = function (node: any): boolean {
-    const reqName: string = "a";
-    return node.nodeName === reqName;
-};
-
-// helper
-// Req: node must be the "a" node of a JSON html tree, this node must contain attr list of size 2, with first index
-// containing the building "href" along with the path value.
-// Eff: from the a node given, returns the path of the building file.
-let getPathFromNode = function (node: any): string {
-    return node.attrs[0].value;
+// Req: tbody param must be a html json tree tbody of a table
+// Eff: returns only the tbody child nodes that are rows
+let keepOnlyRowElements = function (tbody: any): any {
+    return tbody.childNodes.filter((val: any) => {
+        const forbiddenText: string = "#text";
+        return val.nodeName !== forbiddenText;
+    });
 };
 
 // helper

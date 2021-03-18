@@ -11,11 +11,12 @@ import {atLeastOneJSON, isRootDirCourses, isValidZip} from "../src/controller/Fi
 import {saveToData} from "../src/controller/SaveAndLoad";
 import {Dataset} from "../src/controller/Dataset";
 import {
-    extractFilePaths,
+    createListOfBuildings,
     loadIndexInString,
     retrieveBuildingTable,
     stringToJsonTree
 } from "../src/controller/SpaceHelper";
+import {Building} from "../src/controller/Building";
 
 // This extends chai with assertions that natively support Promises
 chai.use(chaiAsPromised);
@@ -379,7 +380,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
     // retrieveBuildingTable test
     // ******
     // ****
-    /*it("Should return the table in JSON form containing building indices", function () {
+   /* it("Should return the table in JSON form containing building indices", function () {
         const id: string = "rooms";
         const futureResult: Promise<JSON|boolean> = loadIndexInString(datasets[id]).
         then((val): JSON => {
@@ -392,12 +393,12 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
     });*/
     // ****
     // ******
-    // retrieveBuildingTable test
+    // createListOfBuildings test
     // ******
     // ****
-    it("Should return the file paths in string form, in list, from building table tree", function () {
+    it("Should return a list of buildings from building table tree", function () {
         const id: string = "rooms";
-        const futureResult: Promise<string[]> = loadIndexInString(datasets[id]).
+        const futureResult: Promise<Building[]> = loadIndexInString(datasets[id]).
         then((val): JSON => {
             return stringToJsonTree(val);
         }).
@@ -405,9 +406,25 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
             return retrieveBuildingTable(val);
         }).
         then((val) => {
-            return extractFilePaths(val);
+            return createListOfBuildings(val);
         });
         return expect(futureResult).eventually.deep.equal(" ");
+    });
+    // ****
+    // ******
+    // geoLocation tests
+    // ******
+    // ****
+    it("Should set the geo location of a given building", function () {
+        const sn: string = "IBLC";
+        const fn: string = "Irving K Barber Learning Centre";
+        const ad: string = "1961 East Mall V6T 1Z1";
+        const fp: string = "./campus/discover/buildings-and-classrooms/IBLC";
+        const building = new Building(fn, sn, ad, fp);
+        building.setLatAndLon();
+        const lat: number = building.lat;
+        const lon: number = building.lon;
+        return expect(lat).to.equal(0);
     });
 });
 
