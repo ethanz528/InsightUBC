@@ -1,4 +1,3 @@
-import * as http from "http";
 export class Building {
 
     public fullName: string;
@@ -18,10 +17,5 @@ export class Building {
         this.lat = -1;
         this.lon = -1;
         this.roomNode = -1;
-    }
-
-    public setLatAndLon() {
-        const h = require("http");
-        const latAndLon = h.get();
     }
 }

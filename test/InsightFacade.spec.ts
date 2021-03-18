@@ -1,5 +1,5 @@
-import { expect } from "chai";
 import * as chai from "chai";
+import {expect} from "chai";
 import * as fs from "fs-extra";
 import * as chaiAsPromised from "chai-as-promised";
 import {InsightDatasetKind, InsightError} from "../src/controller/IInsightFacade";
@@ -17,6 +17,7 @@ import {
     stringToJsonTree
 } from "../src/controller/SpaceHelper";
 import {Building} from "../src/controller/Building";
+import {setBuildingGeoLocation} from "../src/controller/GeoLocate";
 
 // This extends chai with assertions that natively support Promises
 chai.use(chaiAsPromised);
@@ -421,10 +422,8 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
         const ad: string = "1961 East Mall V6T 1Z1";
         const fp: string = "./campus/discover/buildings-and-classrooms/IBLC";
         const building = new Building(fn, sn, ad, fp);
-        building.setLatAndLon();
-        const lat: number = building.lat;
-        const lon: number = building.lon;
-        return expect(lat).to.equal(0);
+        const futureResult = setBuildingGeoLocation(building);
+        return expect(futureResult).to.eventually.deep.equal(0);
     });
 });
 
