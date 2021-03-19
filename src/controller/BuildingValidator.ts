@@ -17,7 +17,7 @@ export let isBuildingValid = function (building: Building, file: string): Promis
 
 // Req: Building must have it's lat and lon set
 // Eff: returns true if building contains lat and lon, false otherwise
-export let wasAbleToGeoLocateBuilding = function (building: Building): Promise<boolean> {
+let wasAbleToGeoLocateBuilding = function (building: Building): Promise<boolean> {
     if (building.lat && building.lon) {
         return Promise.resolve(true);
     } else {
@@ -27,7 +27,7 @@ export let wasAbleToGeoLocateBuilding = function (building: Building): Promise<b
 
 // Req: building's file path field must be a valid address in file, file must be a valid zip file
 // Eff: return true if building's file path contains room information, false otherwise
-export let buildingContainsRoomInfo = function (building: Building, file: string): Promise<boolean> {
+let buildingContainsRoomInfo = function (building: Building, file: string): Promise<boolean> {
     return retrieveRoomsFileInString(file, building.filePath).
     then((val) => {
         return stringToJsonTree(val);
@@ -47,7 +47,7 @@ export let retrieveRoomsFileInString = function (file: string, path: string): Pr
 };
 
 // helper
-export let containsRoomInfo = function (treeNode: any): boolean {
+let containsRoomInfo = function (treeNode: any): boolean {
     const reqName: string = "table";
     let resultArray: boolean[] = [];
     if (!atLeastOneExplorableChildNode(treeNode.childNodes)) {

@@ -177,7 +177,7 @@ export let containsValue = function (list: any[], value: any): boolean {
 // helper
 // Req: tbody param must be a html json tree tbody of a table
 // Eff: returns only the tbody child nodes that are rows
-let keepOnlyRowElements = function (tbody: any): any {
+export let keepOnlyRowElements = function (tbody: any): any {
     return tbody.childNodes.filter((val: any) => {
         const forbiddenText: string = "#text";
         return val.nodeName !== forbiddenText;
