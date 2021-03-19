@@ -6,7 +6,7 @@ export class Building {
     public filePath: string;
     public lat: number;
     public lon: number;
-    public roomNode: any;
+    public roomsNode: any;
 
 
     constructor(fullName: string, shortName: string, address: string, filePath: string) {
@@ -16,6 +16,6 @@ export class Building {
         this.filePath = filePath;
         this.lat = -1;
         this.lon = -1;
-        this.roomNode = -1;
+        this.roomsNode = -1;
     }
 }

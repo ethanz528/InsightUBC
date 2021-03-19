@@ -3,9 +3,25 @@ import * as JSZip from "jszip";
 import has = Reflect.has;
 import {Building} from "./Building";
 
+
+// Req: file must be the path of a valid file in string form
+// Eff: returns a list of buildings from the index.htm file in the rooms folder
+export let loadBuildingListFromFile = function (file: string): Promise<Building[]> {
+    return loadIndexInString(file).
+    then((val) => {
+        return stringToJsonTree(val);
+    }).
+    then((val) => {
+        return retrieveBuildingTable(val);
+    }).
+    then((val) => {
+        return createListOfBuildings(val);
+    });
+};
+
 // Req: the file be available in given path
 // Eff: loads all of index.htm in string form
-export let loadIndexInString = function (file: string): Promise<string> {
+let loadIndexInString = function (file: string): Promise<string> {
     let zip = new JSZip();
     return zip.loadAsync(file, {base64: true}).
     then((zipObj): Promise<string> => {
@@ -22,7 +38,7 @@ export let stringToJsonTree = function (htmlString: string): JSON {
 
 // Req: htmlJsonTree be a valid html JSON tree
 // Eff: traverses the JSON tree to locate and return the table containing building indices
-export let retrieveBuildingTable = function (htmlJsonTreeNode: any): JSON | boolean {
+let retrieveBuildingTable = function (htmlJsonTreeNode: any): JSON | boolean {
     let tableNode;
     if (!atLeastOneExplorableChildNode(htmlJsonTreeNode.childNodes)) {
         return false;
@@ -42,7 +58,7 @@ export let retrieveBuildingTable = function (htmlJsonTreeNode: any): JSON | bool
 
 // Req: table must be valid html json tree, containing building information
 // Eff: from the json tree, constructs a list buildings.
-export let createListOfBuildings = function (table: any): Building[] {
+let createListOfBuildings = function (table: any): Building[] {
     const buildingList: Building[] = [];
     const tbody = retrieveTbody(table.childNodes);
     const onlyRows = keepOnlyRowElements(tbody);
@@ -52,7 +68,10 @@ export let createListOfBuildings = function (table: any): Building[] {
         const fn: string = dataColumns[5].childNodes[1].childNodes[0].value;
         const fp: string = dataColumns[5].childNodes[1].attrs[0].value;
         const ad: string = dataColumns[7].childNodes[0].value.trim();
-        const building = new Building(fn, sn, ad, fp);
+        const start = 2;
+        const end = fp.length - 1;
+        const path = fp.slice(start, end);
+        const building = new Building(fn, sn, ad, path);
         buildingList.push(building);
     }
 
@@ -149,7 +168,7 @@ let verifyRowItem = function (rowItem: any): boolean {
 
 // helper
 // Eff: returns true if the given array contains value, false otherwise.
-let containsValue = function (list: any[], value: any): boolean {
+export let containsValue = function (list: any[], value: any): boolean {
     const val: number = list.indexOf(value);
     const notFoundVal = -1;
     return val !== notFoundVal;
@@ -168,7 +187,7 @@ let keepOnlyRowElements = function (tbody: any): any {
 // helper
 // Req: childNodes must be in JSON, and be a valid list of additional nodes
 // Eff: returns true of child nodes exist and can be explored, false otherwise
-let atLeastOneExplorableChildNode = function (childNodes: any): boolean {
+export let atLeastOneExplorableChildNode = function (childNodes: any): boolean {
     return childNodes && childNodes.length > 0;
 };
 
