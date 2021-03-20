@@ -42,7 +42,7 @@ export let retrieveRoomsFileInString = function (file: string, path: string): Pr
     let zip = new JSZip();
     return zip.loadAsync(file, {base64: true}).
     then((zipObj): Promise<string> => {
-        return zipObj.folder("rooms").file(path).async("string");
+            return zipObj.folder("rooms").file(path).async("string");
     });
 };
 

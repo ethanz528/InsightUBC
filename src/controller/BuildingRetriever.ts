@@ -1,6 +1,5 @@
 
 import * as JSZip from "jszip";
-import has = Reflect.has;
 import {Building} from "./Building";
 
 
@@ -69,7 +68,7 @@ let createListOfBuildings = function (table: any): Building[] {
         const fp: string = dataColumns[5].childNodes[1].attrs[0].value;
         const ad: string = dataColumns[7].childNodes[0].value.trim();
         const start = 2;
-        const end = fp.length - 1;
+        const end = fp.length;
         const path = fp.slice(start, end);
         const building = new Building(fn, sn, ad, path);
         buildingList.push(building);

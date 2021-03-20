@@ -8,12 +8,12 @@ import {atLeastOneExplorableChildNode, keepOnlyRowElements, stringToJsonTree} fr
 export let returnListOfRooms = function (buildingList: Building[], file: string): Promise<Room[]> {
     return retrieveRoomsFromBuildingList(buildingList, file).
     then((val) => {
-        return MakeSingleListOfRooms(val);
+        return makeSingleListOfRooms(val);
     });
 };
 
 // Eff: returns a single from a list of list of rooms
-export let MakeSingleListOfRooms = function (listOfRoomList: Room[][]): Room[] {
+let makeSingleListOfRooms = function (listOfRoomList: Room[][]): Room[] {
     let result: Room[] = [];
     for (const roomList of listOfRoomList) {
         result.concat(roomList);
@@ -51,21 +51,23 @@ export let retrieveListOfRooms = function (building: Building, file: string): Pr
 
 // helper
 // Req: node must contain tbody some where in its tree structure
-const reqName: string = "tbody";
 let tbodyRecursiveRetrieval = function (node: any): JSON|boolean {
+    const reqName: string = "tbody";
+    let tbody;
     if (!atLeastOneExplorableChildNode(node.childNodes)) {
         return false;
     } else if (node.nodeName === reqName) {
-        return node;
+        tbody = node;
     } else {
         const dfsTodo = node.childNodes;
         for (const todo of dfsTodo) {
             const resultOfTraversal = tbodyRecursiveRetrieval(todo);
             if (resultOfTraversal) {
-                return resultOfTraversal;
+                tbody = resultOfTraversal;
             }
         }
     }
+    return tbody;
 };
 
 let assembleListOfRooms = function (tbodyNode: any, building: Building): Room[] {

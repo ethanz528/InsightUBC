@@ -379,6 +379,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
     // ******
     // ****
     it("Should return a list of rooms from a list of buildings", function () {
+        this.timeout(0);
         const id: string = "rooms";
         const futureResult: Promise<Room[]> = loadBuildingListFromFile(datasets[id]).
         then((val) => {
