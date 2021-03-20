@@ -53,21 +53,19 @@ export let retrieveListOfRooms = function (building: Building, file: string): Pr
 // Req: node must contain tbody some where in its tree structure
 let tbodyRecursiveRetrieval = function (node: any): JSON|boolean {
     const reqName: string = "tbody";
-    let tbody;
     if (!atLeastOneExplorableChildNode(node.childNodes)) {
         return false;
     } else if (node.nodeName === reqName) {
-        tbody = node;
+        return node;
     } else {
         const dfsTodo = node.childNodes;
         for (const todo of dfsTodo) {
             const resultOfTraversal = tbodyRecursiveRetrieval(todo);
             if (resultOfTraversal) {
-                tbody = resultOfTraversal;
+                return resultOfTraversal;
             }
         }
     }
-    return tbody;
 };
 
 let assembleListOfRooms = function (tbodyNode: any, building: Building): Room[] {
