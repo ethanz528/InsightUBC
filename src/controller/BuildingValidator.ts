@@ -2,6 +2,7 @@ import {Building} from "./Building";
 import * as JSZip from "jszip";
 import {atLeastOneExplorableChildNode, containsValue, stringToJsonTree} from "./BuildingRetriever";
 
+
 // Req: Building must have it's lat and lon set already
 // Eff: returns true if building is valid, false otherwise
 export let isBuildingValid = function (building: Building, file: string): Promise<boolean> {

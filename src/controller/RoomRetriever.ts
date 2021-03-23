@@ -1,14 +1,33 @@
 import {Building} from "./Building";
 import {Room} from "./Room";
 import {isBuildingValid, retrieveRoomsFileInString} from "./BuildingValidator";
-import {atLeastOneExplorableChildNode, keepOnlyRowElements, stringToJsonTree} from "./BuildingRetriever";
+import {atLeastOneExplorableChildNode, loadBuildingListFromFile, stringToJsonTree} from "./BuildingRetriever";
+import {setGeoLocationForList} from "./GeoLocate";
 
-// Req: file must be a valid zip file
-// Eff: returns a list of rooms from a list of buildings and the zip file where their room data resides
-export let returnListOfRooms = function (buildingList: Building[], file: string): Promise<Room[]> {
-    return retrieveRoomsFromBuildingList(buildingList, file).
+
+export let generateRoomList = function (file: string): Promise<any> {
+    return loadBuildingListFromFile(file).
+    then((value) => {
+        return setGeoLocationForList(value);
+    }).
     then((val) => {
-        return makeSingleListOfRooms(val);
+        return filterInvalidBuilding(val, file);
+    }).
+    then((val) => {
+        let result: any[] = [];
+        for (const building of val) {
+            let promOfRoomList = retrieveListOfRooms(building, file);
+            result.push(promOfRoomList);
+        }
+        return Promise.all(result);
+    });
+};
+
+// Mod: buildingList
+// Eff: removes invalid buildings from buildingList and returns the resulting array
+export let filterInvalidBuilding = function (buildingList: Building[], file: string): Building[] {
+    return buildingList.filter((item) => {
+        return isBuildingValid(item, file);
     });
 };
 
@@ -19,19 +38,6 @@ let makeSingleListOfRooms = function (listOfRoomList: Room[][]): Room[] {
         result.concat(roomList);
     }
     return result;
-};
-
-// Req: file must be a valid zip file
-// Eff: returns a combined list of rooms from all valid buildings
-export let retrieveRoomsFromBuildingList = function (buildingList: Building[], file: string): Promise<Room[][]> {
-    let result = [];
-    for (const building of buildingList) {
-        if (isBuildingValid(building, file)) {
-            const value: Promise<Room[]> = retrieveListOfRooms(building, file);
-            result.push(value);
-        }
-    }
-    return Promise.all(result);
 };
 
 // Req: all building's filepath for rooms must exist in the given file, file must be a valid zip file
@@ -51,7 +57,7 @@ export let retrieveListOfRooms = function (building: Building, file: string): Pr
 
 // helper
 // Req: node must contain tbody some where in its tree structure
-let tbodyRecursiveRetrieval = function (node: any): JSON|boolean {
+export let tbodyRecursiveRetrieval = function (node: any): JSON|boolean {
     const reqName: string = "tbody";
     if (!atLeastOneExplorableChildNode(node.childNodes)) {
         return false;
@@ -61,24 +67,30 @@ let tbodyRecursiveRetrieval = function (node: any): JSON|boolean {
         const dfsTodo = node.childNodes;
         for (const todo of dfsTodo) {
             const resultOfTraversal = tbodyRecursiveRetrieval(todo);
-            if (resultOfTraversal) {
+            if (resultOfTraversal !== false) {
                 return resultOfTraversal;
             }
         }
     }
 };
 
+// testing
+let numTriedToAssemble = 0;
 let assembleListOfRooms = function (tbodyNode: any, building: Building): Room[] {
+    numTriedToAssemble++;
     let result: Room[] = [];
     const fullName: string = building.fullName;
     const shortName: string = building.shortName;
     const address: string = building.address;
     const lat: number = building.lat;
     const lon: number = building.lon;
-    const onlyRows = keepOnlyRowElements(tbodyNode);
-    for (const row of onlyRows) {
-        const room: Room = constructRoomFromRow(fullName, shortName, address, lat, lon, row);
-        result.push(room);
+    if (tbodyNode.childNodes !== undefined) {
+        for (let node of tbodyNode.childNodes) {
+            if (node.name !== undefined && node.nodeName !== "#text") {
+                let room: Room = constructRoomFromRow(fullName, shortName, address, lat, lon, node);
+                result.push(room);
+            }
+        }
     }
     return result;
 };
