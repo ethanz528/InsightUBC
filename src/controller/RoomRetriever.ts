@@ -67,7 +67,7 @@ export let tbodyRecursiveRetrieval = function (node: any): JSON|boolean {
         const dfsTodo = node.childNodes;
         for (const todo of dfsTodo) {
             const resultOfTraversal = tbodyRecursiveRetrieval(todo);
-            if (resultOfTraversal !== false) {
+            if (resultOfTraversal) {
                 return resultOfTraversal;
             }
         }
