@@ -1,5 +1,5 @@
 import * as JSZip from "jszip";
-import {loadFromContent} from "./DatasetHelper";
+import {loadFromContent} from "./CourseHelper";
 
 export let isFileValid = function (content: string): Promise<boolean> {
     return isValidZip(content).then((val) => {
@@ -15,11 +15,7 @@ export let isFileValid = function (content: string): Promise<boolean> {
             return false;
         }
     }).then((val) => {
-        if (val) {
-            return true;
-        } else {
-            return false;
-        }
+        return val;
     });
 };
 

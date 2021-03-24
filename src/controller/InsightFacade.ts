@@ -31,18 +31,25 @@ export default class InsightFacade implements IInsightFacade {
             return Promise.reject(new InsightError("ID invalid, contains underscore OR is only white space," +
                 "dataset NOT added."));
         }
-        return isFileValid(content).
-        then((val) => {
-            if (val) {
-                newDataset = new Dataset(id, kind, content);
-                this.idList.push(id);
-                this.addedDatasets[id] = newDataset;
-                return Promise.resolve(this.idList);
-            } else {
-                return Promise.reject(new InsightError("File invalid, not in Zip, courses folder not in root " +
-                    "directory, or no course files in JSON. Dataset NOT added."));
-            }
-        });
+        if (kind === "courses") {
+            return isFileValid(content).
+            then((val) => {
+                if (val) {
+                    newDataset = new Dataset(id, kind, content);
+                    this.idList.push(id);
+                    this.addedDatasets[id] = newDataset;
+                    return Promise.resolve(this.idList);
+                } else {
+                    return Promise.reject(new InsightError("File invalid, not in Zip, courses folder not in root " +
+                        "directory, or no course files in JSON. Dataset NOT added."));
+                }
+            });
+        } else if (kind === "rooms") {
+            newDataset = new Dataset(id, kind, content);
+            this.idList.push(id);
+            this.addedDatasets[id] = newDataset;
+            return Promise.resolve(this.idList);
+        }
     }
 
     public removeDataset(id: string): Promise<string> {
