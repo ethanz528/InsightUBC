@@ -15,7 +15,7 @@ import {Building} from "../src/controller/Building";
 import {setGeoLocationForList} from "../src/controller/GeoLocate";
 import {isBuildingValid} from "../src/controller/BuildingValidator";
 import {Room} from "../src/controller/Room";
-import {generateRoomList} from "../src/controller/RoomRetriever";
+import {generateRoomList, generateRoomListV1} from "../src/controller/RoomRetriever";
 
 // This extends chai with assertions that natively support Promises
 chai.use(chaiAsPromised);
@@ -382,6 +382,18 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
         this.timeout(0);
         const id: string = "rooms";
         const futureResult: Promise<Building[]> = generateRoomList(datasets[id]);
+        return expect(futureResult).eventually.deep.equal(" ");
+    });
+    it("Should return a list of rooms from a list of buildings V1", function () {
+        this.timeout(0);
+        const id: string = "rooms";
+        const futureResult: Promise<any> = loadBuildingListFromFile(datasets[id]).
+        then((val) => {
+            return setGeoLocationForList(val);
+        }).
+        then((val) => {
+            return generateRoomListV1(val, datasets[id]);
+        });
         return expect(futureResult).eventually.deep.equal(" ");
     });
     // ****

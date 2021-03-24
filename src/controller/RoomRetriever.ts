@@ -23,6 +23,46 @@ export let generateRoomList = function (file: string): Promise<any> {
     });
 };
 
+export let generateRoomListV1 = function (buildingList: Building[], file: string) {
+    return retrieveFileStringForList(buildingList, file).
+    then((val) => {
+        return setFileStringFieldForList(buildingList, val);
+    }).
+    then((val) => {
+        return setTreeNodeFieldForList(buildingList);
+    });
+};
+
+
+export let retrieveFileStringForList = function (buildingList: Building[], file: string): Promise<string[]> {
+    let promArray: any[] = [];
+    for (const building of buildingList) {
+        let prom = retrieveRoomsFileInString(file, building.filePath);
+        promArray.push(prom);
+    }
+    return Promise.all(promArray);
+};
+
+
+export let setFileStringFieldForList = function (buildingList: Building[], fileStringList: string[]): Building[] {
+    let listIndex: number = 0;
+    for (let building of buildingList) {
+        const fileString = fileStringList[listIndex];
+        building.fileString = fileString;
+        listIndex++;
+    }
+    return buildingList;
+};
+
+export let setTreeNodeFieldForList = function (buildingList: Building[]): Building[] {
+    for (let building of buildingList) {
+        let treeNode = stringToJsonTree(building.fileString);
+        building.htmlTree = treeNode;
+    }
+    return buildingList;
+};
+
+
 // Mod: buildingList
 // Eff: removes invalid buildings from buildingList and returns the resulting array
 export let filterInvalidBuilding = function (buildingList: Building[], file: string): Building[] {

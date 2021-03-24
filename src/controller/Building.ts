@@ -6,7 +6,9 @@ export class Building {
     public filePath: string;
     public lat: number;
     public lon: number;
-    public roomsNode: any;
+    public fileString: string;
+    public htmlTree: JSON;
+    public roomsRow: JSON;
 
 
     constructor(fullName: string, shortName: string, address: string, filePath: string) {
@@ -16,6 +18,8 @@ export class Building {
         this.filePath = filePath;
         this.lat = -1;
         this.lon = -1;
-        this.roomsNode = -1;
+        this.fileString = "empty";
+        this.htmlTree = null;
+        this.roomsRow = null;
     }
 }
