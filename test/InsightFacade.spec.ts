@@ -381,7 +381,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
     it("Should return a list of rooms from a list of buildings", function () {
         this.timeout(0);
         const id: string = "rooms";
-        const futureResult: Promise<Building[]> = generateRoomList(datasets[id]);
+        const futureResult: Promise<any> = generateRoomList(datasets[id]);
         return expect(futureResult).eventually.deep.equal(" ");
     });
     it("Should return a list of rooms from a list of buildings V1", function () {
