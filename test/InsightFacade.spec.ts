@@ -15,7 +15,7 @@ import {Building} from "../src/controller/Building";
 import {setGeoLocationForList} from "../src/controller/GeoLocate";
 import {isBuildingValid} from "../src/controller/BuildingValidator";
 import {Room} from "../src/controller/Room";
-import {generateRoomList, generateRoomListV1} from "../src/controller/RoomRetriever";
+import {generateRoomList} from "../src/controller/RoomHelper";
 
 // This extends chai with assertions that natively support Promises
 chai.use(chaiAsPromised);
@@ -135,6 +135,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
     // ******
     // ****
     it("2 valid datasets being added", function () {
+        this.timeout(0);
         const id: string = "courses";
         const id1: string = "someInvalid";
         const expected: string[] = [id, id1];
@@ -341,7 +342,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
     // saveToData tests
     // ******
     // ****
-    it("Should add a partially valid dataset, and then save the CourseSections to data", function () {
+    /*it("Should add a partially valid dataset, and then save the CourseSections to data", function () {
         const id: string = "someInvalid";
         const item: Dataset =  new Dataset(id, InsightDatasetKind.Courses, datasets[id]);
         const futureResult: Promise<boolean> = item.sections.
@@ -349,7 +350,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
              return saveToData(id, val);
         });
         return expect(futureResult).eventually.deep.equal(true);
-    });
+    });*/
     // ****
     // ******
     // createBuildingListFromFile test
@@ -378,22 +379,10 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
     // roomRetrieval test
     // ******
     // ****
-    it("Should return a list of rooms from a list of buildings", function () {
+    it("Should return a list of rooms from a given file", function () {
         this.timeout(0);
         const id: string = "rooms";
         const futureResult: Promise<any> = generateRoomList(datasets[id]);
-        return expect(futureResult).eventually.deep.equal(" ");
-    });
-    it("Should return a list of rooms from a list of buildings V1", function () {
-        this.timeout(0);
-        const id: string = "rooms";
-        const futureResult: Promise<any> = loadBuildingListFromFile(datasets[id]).
-        then((val) => {
-            return setGeoLocationForList(val);
-        }).
-        then((val) => {
-            return generateRoomListV1(val, datasets[id]);
-        });
         return expect(futureResult).eventually.deep.equal(" ");
     });
     // ****
@@ -443,7 +432,19 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
         const futureResult: Promise<boolean> = isBuildingValid(building, datasets[id]);
         return expect(futureResult).to.eventually.deep.equal(false);
     });
+    // ****
+    // ******
+    // addDataset Room test
+    // ******
+    // ****
+    it("Should add a valid Room dataset", function () {
+        const id: string = "rooms";
+        const expected: string[] = [id];
+        const futureResult: Promise<string[]> = insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Rooms);
+        return expect(futureResult).to.eventually.deep.equal(expected);
+    });
 });
+
 
 /*
  * This test suite dynamically generates tests from the JSON files in test/queries.

@@ -1,81 +1,58 @@
 import {Building} from "./Building";
 import {Room} from "./Room";
 import {isBuildingValid, retrieveRoomsFileInString} from "./BuildingValidator";
-import {atLeastOneExplorableChildNode, loadBuildingListFromFile, stringToJsonTree} from "./BuildingRetriever";
-import {setGeoLocationForList} from "./GeoLocate";
+import {atLeastOneExplorableChildNode, stringToJsonTree} from "./BuildingRetriever";
 
 
-export let generateRoomList = function (file: string): Promise<any> {
-    return loadBuildingListFromFile(file).
-    then((value) => {
-        return setGeoLocationForList(value);
+export let filterAndGetRoomList = function (buildingList: Building[], file: string): Promise<any> {
+    return returnInvalidIndices(buildingList, file).
+    then((val) => {
+        return removeInvalidRooms(buildingList, val);
     }).
     then((val) => {
-        return filterInvalidBuilding(val, file);
+        return listOfRoomsFromBuildingList(val, file);
     }).
     then((val) => {
-        let result: any[] = [];
-        for (const building of val) {
-            let promOfRoomList = retrieveListOfRooms(building, file);
-            result.push(promOfRoomList);
-        }
-        return Promise.all(result);
+        return makeSingleListOfRooms(val);
     });
 };
 
-export let generateRoomListV1 = function (buildingList: Building[], file: string) {
-    return retrieveFileStringForList(buildingList, file).
-    then((val) => {
-        return setFileStringFieldForList(buildingList, val);
-    }).
-    then((val) => {
-        return setTreeNodeFieldForList(buildingList);
-    });
-};
-
-
-export let retrieveFileStringForList = function (buildingList: Building[], file: string): Promise<string[]> {
-    let promArray: any[] = [];
-    for (const building of buildingList) {
-        let prom = retrieveRoomsFileInString(file, building.filePath);
+// Req: file must contain all filePaths from Buildings in buildingList
+// Eff: returns an array signifying invalid building indices in the building list
+export let returnInvalidIndices = function (buildingList: Building[], file: string): Promise<boolean[]> {
+    let promArray: Array<Promise<boolean>> = [];
+    for (let building of buildingList ) {
+        let prom = isBuildingValid(building, file);
         promArray.push(prom);
     }
     return Promise.all(promArray);
 };
 
-
-export let setFileStringFieldForList = function (buildingList: Building[], fileStringList: string[]): Building[] {
-    let listIndex: number = 0;
-    for (let building of buildingList) {
-        const fileString = fileStringList[listIndex];
-        building.fileString = fileString;
-        listIndex++;
-    }
-    return buildingList;
-};
-
-export let setTreeNodeFieldForList = function (buildingList: Building[]): Building[] {
-    for (let building of buildingList) {
-        let treeNode = stringToJsonTree(building.fileString);
-        building.htmlTree = treeNode;
-    }
-    return buildingList;
-};
-
-
-// Mod: buildingList
-// Eff: removes invalid buildings from buildingList and returns the resulting array
-export let filterInvalidBuilding = function (buildingList: Building[], file: string): Building[] {
-    return buildingList.filter((item) => {
-        return isBuildingValid(item, file);
+export let removeInvalidRooms = function (buildingList: Building[], invalidIndices: boolean[]): Building[] {
+    let index: number = 0;
+    return buildingList.filter(() => {
+        const result: boolean = invalidIndices[index];
+        index++;
+        return result;
     });
+};
+
+export let listOfRoomsFromBuildingList = function (buildingList: Building[], file: string): Promise<Room[][]> {
+    let promArray: any[] = [];
+    for (const building of buildingList) {
+        let promise = retrieveListOfRooms(building, file);
+        promArray.push(promise);
+    }
+    return Promise.all(promArray);
 };
 
 // Eff: returns a single from a list of list of rooms
 let makeSingleListOfRooms = function (listOfRoomList: Room[][]): Room[] {
     let result: Room[] = [];
     for (const roomList of listOfRoomList) {
-        result.concat(roomList);
+        for (const room of roomList) {
+            result.push(room);
+        }
     }
     return result;
 };
@@ -114,22 +91,17 @@ export let tbodyRecursiveRetrieval = function (node: any): JSON|boolean {
     }
 };
 
-// testing
-let numTriedToAssemble = 0;
 let assembleListOfRooms = function (tbodyNode: any, building: Building): Room[] {
-    numTriedToAssemble++;
     let result: Room[] = [];
     const fullName: string = building.fullName;
     const shortName: string = building.shortName;
     const address: string = building.address;
     const lat: number = building.lat;
     const lon: number = building.lon;
-    if (tbodyNode.childNodes !== undefined) {
-        for (let node of tbodyNode.childNodes) {
-            if (node.name !== undefined && node.nodeName !== "#text") {
-                let room: Room = constructRoomFromRow(fullName, shortName, address, lat, lon, node);
-                result.push(room);
-            }
+    for (let node of tbodyNode.childNodes) {
+        if (node.nodeName !== "#text") {
+            let room: Room = constructRoomFromRow(fullName, shortName, address, lat, lon, node);
+            result.push(room);
         }
     }
     return result;
@@ -137,6 +109,14 @@ let assembleListOfRooms = function (tbodyNode: any, building: Building): Room[] 
 
 let constructRoomFromRow = function (fullname: string, shortName: string, address: string,
                                      lat: number, lon: number, row: any): Room {
-    return new Room(fullname, shortName, " ", " ", address, lat, lon, 0, " ", " ",
-        " ");
+    const roomsHref: string = row.childNodes[1].childNodes[1].attrs[0].value;
+    const seatsString: string = row.childNodes[3].childNodes[0].value;
+    const seats: number = Number.parseInt(seatsString, 10);
+    const furniture: string = row.childNodes[5].childNodes[0].value.trim();
+    const type: string = row.childNodes[7].childNodes[0].value.trim();
+    const index: number = roomsHref.lastIndexOf("-") + 1;
+    const num: string = roomsHref.slice(index);
+    const name: string = shortName + " " + num;
+    return new Room(fullname, shortName, num, name, address, lat, lon, seats, type, furniture,
+        roomsHref);
 };
