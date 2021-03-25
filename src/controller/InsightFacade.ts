@@ -68,19 +68,24 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     public performQuery(query: any): Promise<any[]> {
-        let q = new Q(query, this.addedDatasets, this.idList);
-        let data: any[];
+        let q = new Q(this.addedDatasets);
         try {
-            data = q.performQuery();
+            return Promise.resolve(q.performQuery(query));
         } catch (error) {
             if ((error instanceof InsightError) || (error instanceof ResultTooLargeError)) {
                 return Promise.reject(error);
             }
         }
-        return Promise.resolve(data);
     }
 
     public listDatasets(): Promise<InsightDataset[]> {
-        return Promise.reject("Not implemented.");
+        return Promise.resolve(Object.values(this.addedDatasets).map((e: Dataset) => {
+            return {
+                id: e.id,
+                kind: e.kind,
+                numRows: (e.listOfCourseSectionsOrRooms).length
+            };
+        }));
+        // return Promise.reject("Not implemented.");
     }
 }

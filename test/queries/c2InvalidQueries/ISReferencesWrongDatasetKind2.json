@@ -7,12 +7,12 @@
                     "AND":[
                         {
                             "GT":{
-                                "courses_seats":90
+                                "courses_avg":90
                             }
                         },
                         {
                             "IS":{
-                                "courses_dept":"adhe"
+                                "courses_furniture":"adhe"
                             }
                         }
                     ]

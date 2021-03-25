@@ -1,4 +1,5 @@
 export class Room {
+
     public fullname: string;
     public shortname: string;
     public number: string;

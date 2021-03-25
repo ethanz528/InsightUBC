@@ -2,7 +2,7 @@ import * as chai from "chai";
 import {expect} from "chai";
 import * as fs from "fs-extra";
 import * as chaiAsPromised from "chai-as-promised";
-import {InsightDatasetKind, InsightError} from "../src/controller/IInsightFacade";
+import {InsightDataset, InsightDatasetKind, InsightError} from "../src/controller/IInsightFacade";
 import InsightFacade from "../src/controller/InsightFacade";
 import Log from "../src/Util";
 import TestUtil from "./TestUtil";
@@ -337,12 +337,13 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
         const result: Promise<boolean> = atLeastOneJSON(datasets[id]);
         return expect(result).to.eventually.deep.equal(false);
     });
+    /*
     // ****
     // ******
     // saveToData tests
     // ******
     // ****
-    /*it("Should add a partially valid dataset, and then save the CourseSections to data", function () {
+    it("Should add a partially valid dataset, and then save the CourseSections to data", function () {
         const id: string = "someInvalid";
         const item: Dataset =  new Dataset(id, InsightDatasetKind.Courses, datasets[id]);
         const futureResult: Promise<boolean> = item.sections.
@@ -350,7 +351,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
              return saveToData(id, val);
         });
         return expect(futureResult).eventually.deep.equal(true);
-    });*/
+    });
     // ****
     // ******
     // createBuildingListFromFile test
@@ -385,6 +386,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
         const futureResult: Promise<any> = generateRoomList(datasets[id]);
         return expect(futureResult).eventually.deep.equal(" ");
     });
+    */
     // ****
     // ******
     // isBuildingValid test
@@ -443,6 +445,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
         const futureResult: Promise<string[]> = insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Rooms);
         return expect(futureResult).to.eventually.deep.equal(expected);
     });
+
 });
 
 
@@ -455,7 +458,7 @@ describe("InsightFacade PerformQuery", () => {
     const datasetsToQuery: { [id: string]: {path: string, kind: InsightDatasetKind} } = {
         courses: {path: "./test/data/courses.zip", kind: InsightDatasetKind.Courses},
         otherCourses: {path: "./test/data/otherCourses.zip", kind: InsightDatasetKind.Courses},
-        rooms: {path: "./test/data/otherCourses.zip", kind: InsightDatasetKind.Rooms}
+        rooms: {path: "./test/data/rooms.zip", kind: InsightDatasetKind.Rooms}
     };
     let insightFacade: InsightFacade;
     let testQueries: ITestQuery[] = [];
