@@ -12,11 +12,11 @@ export class Room {
     public furniture: string;
     public href: string;
 
-    constructor(fullname: string, shortname: string, nnumber: string, name: string, address: string, lat: number,
+    constructor(fullname: string, shortname: string, num: string, name: string, address: string, lat: number,
                 lon: number, seats: number, type: string, furniture: string, href: string) {
         this.fullname = fullname;
         this.shortname = shortname;
-        this.number = nnumber;
+        this.number = num;
         this.name = name;
         this.address = address;
         this.lat = lat;
@@ -29,17 +29,17 @@ export class Room {
 
     public makeDict(id: string) {
         let dict: { [id: string]: string | number } = {};
-        dict[id + "_dept"] = this.fullname;
-        dict[id + "_id"] = this.shortname;
-        dict[id + "_avg"] = this.number;
-        dict[id + "_instructor"] = this.name;
-        dict[id + "_title"] = this.address;
-        dict[id + "_pass"] = this.lat;
-        dict[id + "_fail"] = this.lon;
-        dict[id + "_audit"] = this.seats;
-        dict[id + "_uuid"] = this.type;
-        dict[id + "_year"] = this.furniture;
-        dict[id + "_year"] = this.href;
+        dict[id + "_fullname"] = this.fullname;
+        dict[id + "_shortname"] = this.shortname;
+        dict[id + "_number"] = this.number;
+        dict[id + "_name"] = this.name;
+        dict[id + "_address"] = this.address;
+        dict[id + "_lat"] = this.lat;
+        dict[id + "_lon"] = this.lon;
+        dict[id + "_seats"] = this.seats;
+        dict[id + "_type"] = this.type;
+        dict[id + "_furniture"] = this.furniture;
+        dict[id + "_href"] = this.href;
         return dict;
     }
 }

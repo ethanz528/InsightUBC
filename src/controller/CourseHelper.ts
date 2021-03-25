@@ -1,9 +1,8 @@
 import {CourseSection} from "./CourseSection";
 import * as JSZip from "jszip";
 import {isJSON} from "./FileValidator";
-import {InsightDatasetKind} from "./IInsightFacade";
 
-export let generateCourseSecList = function (content: string, kind: InsightDatasetKind): Promise<CourseSection[]> {
+export let generateCourseSecList = function (content: string): Promise<CourseSection[]> {
     return loadFromContent(content).
         then((val) => {
             return createParsedList(val);

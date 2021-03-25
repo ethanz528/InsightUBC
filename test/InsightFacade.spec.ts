@@ -1,5 +1,5 @@
-import { expect } from "chai";
 import * as chai from "chai";
+import {expect} from "chai";
 import * as fs from "fs-extra";
 import * as chaiAsPromised from "chai-as-promised";
 import {InsightDataset, InsightDatasetKind, InsightError} from "../src/controller/IInsightFacade";
@@ -10,6 +10,12 @@ import {isIdInvalid} from "../src/controller/IdChecker";
 import {atLeastOneJSON, isRootDirCourses, isValidZip} from "../src/controller/FileValidator";
 import {saveToData} from "../src/controller/SaveAndLoad";
 import {Dataset} from "../src/controller/Dataset";
+import {loadBuildingListFromFile} from "../src/controller/BuildingRetriever";
+import {Building} from "../src/controller/Building";
+import {setGeoLocationForList} from "../src/controller/GeoLocate";
+import {isBuildingValid} from "../src/controller/BuildingValidator";
+import {Room} from "../src/controller/Room";
+import {generateRoomList} from "../src/controller/RoomHelper";
 
 // This extends chai with assertions that natively support Promises
 chai.use(chaiAsPromised);
@@ -41,6 +47,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
         noSections: "./test/data/no_sections.zip",
         notCourses: "./test/data/not_courses.zip",
         someInvalid: "./test/data/some_invalid.zip",
+        rooms: "./test/data/rooms.zip"
     };
     let datasets: { [id: string]: string } = {};
     let insightFacade: InsightFacade;
@@ -90,7 +97,6 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
     // ****
     // This is a unit test. You should create more like this!
 
-    /*
     it("Should add a valid dataset", function () {
         const id: string = "courses";
         const expected: string[] = [id];
@@ -129,6 +135,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
     // ******
     // ****
     it("2 valid datasets being added", function () {
+        this.timeout(0);
         const id: string = "courses";
         const id1: string = "someInvalid";
         const expected: string[] = [id, id1];
@@ -330,6 +337,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
         const result: Promise<boolean> = atLeastOneJSON(datasets[id]);
         return expect(result).to.eventually.deep.equal(false);
     });
+    /*
     // ****
     // ******
     // saveToData tests
@@ -344,25 +352,102 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
         });
         return expect(futureResult).eventually.deep.equal(true);
     });
-
-    it("Should list a dataset", function () {
-        const id: string = "courses";
-        const dataset: InsightDataset = {
-            id: id,
-            kind: InsightDatasetKind.Courses,
-            numRows: 64612,
-        };
-        const expected: string[] = [id];
-        const futureResult: Promise<string[]> = insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
-        return expect(futureResult).to.eventually.deep.equal(expected).then(() => {
-            const expected2: InsightDataset[] = [dataset];
-            const futureResult2: Promise<InsightDataset[]> = insightFacade.listDatasets();
-            return expect(futureResult2).to.eventually.deep.equal(expected2);
+    // ****
+    // ******
+    // createBuildingListFromFile test
+    // ******
+    // ****
+    it("Should return a list of buildings from the given zip file", function () {
+        const id: string = "rooms";
+        const futureResult: Promise<Building[]> = loadBuildingListFromFile(datasets[id]);
+        return expect(futureResult).eventually.deep.equal(" ");
+    });
+    // ****
+    // ******
+    // setGeoLocationForList test
+    // ******
+    // ****
+    it("Should return a list of buildings with geoLocation", function () {
+        const id: string = "rooms";
+        const futureResult: Promise<Building[]> = loadBuildingListFromFile(datasets[id]).
+        then((val) => {
+            return setGeoLocationForList(val);
         });
+        return expect(futureResult).eventually.deep.equal(" ");
+    });
+    // ****
+    // ******
+    // roomRetrieval test
+    // ******
+    // ****
+    it("Should return a list of rooms from a given file", function () {
+        this.timeout(0);
+        const id: string = "rooms";
+        const futureResult: Promise<any> = generateRoomList(datasets[id]);
+        return expect(futureResult).eventually.deep.equal(" ");
     });
     */
+    // ****
+    // ******
+    // isBuildingValid test
+    // ******
+    // ****
+    it("Should return true as building is valid", function () {
+        const id: string = "rooms";
+        const fn: string = "Allard Hall (LAW)";
+        const sn: string = "ALRD";
+        const ad: string = "1822 East Mall";
+        const fp: string = "campus/discover/buildings-and-classrooms/ALRD";
+        const lat: number = 49.2699;
+        const lon: number = -123.25318;
+        const building: Building = new Building(fn, sn, ad, fp);
+        building.lat = lat;
+        building.lon = lon;
+        const futureResult: Promise<boolean> = isBuildingValid(building, datasets[id]);
+        return expect(futureResult).to.eventually.deep.equal(true);
+    });
+    it("Should return false as building is invalid (no lat and lon)", function () {
+        const id: string = "rooms";
+        const fn: string = "Allard Hall (LAW)";
+        const sn: string = "ALRD";
+        const ad: string = "1822 East Mall";
+        const fp: string = "campus/discover/buildings-and-classrooms/ALRD";
+        const lat: number = undefined;
+        const lon: number = undefined;
+        const building: Building = new Building(fn, sn, ad, fp);
+        building.lat = lat;
+        building.lon = lon;
+        const futureResult: Promise<boolean> = isBuildingValid(building, datasets[id]);
+        return expect(futureResult).to.eventually.deep.equal(false);
+    });
+    it("Should return false as building is invalid (contains no room info)", function () {
+        const id: string = "rooms";
+        const fn: string = "Acute Care Unit";
+        const sn: string = "ACU";
+        const ad: string = "2211 Wesbrook Mall";
+        const fp: string = "campus/discover/buildings-and-classrooms/ACU";
+        const lat: number = 49.26408;
+        const lon: number = -123.24605;
+        const building: Building = new Building(fn, sn, ad, fp);
+        building.lat = lat;
+        building.lon = lon;
+        const futureResult: Promise<boolean> = isBuildingValid(building, datasets[id]);
+        return expect(futureResult).to.eventually.deep.equal(false);
+    });
+    // ****
+    // ******
+    // addDataset Room test
+    // ******
+    // ****
+    it("Should add a valid Room dataset", function () {
+        const id: string = "rooms";
+        const expected: string[] = [id];
+        const futureResult: Promise<string[]> = insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Rooms);
+        return expect(futureResult).to.eventually.deep.equal(expected);
+    });
 
 });
+
 
 /*
  * This test suite dynamically generates tests from the JSON files in test/queries.
@@ -373,7 +458,7 @@ describe("InsightFacade PerformQuery", () => {
     const datasetsToQuery: { [id: string]: {path: string, kind: InsightDatasetKind} } = {
         courses: {path: "./test/data/courses.zip", kind: InsightDatasetKind.Courses},
         otherCourses: {path: "./test/data/otherCourses.zip", kind: InsightDatasetKind.Courses},
-        rooms: {path: "./test/data/otherCourses.zip", kind: InsightDatasetKind.Rooms}
+        rooms: {path: "./test/data/rooms.zip", kind: InsightDatasetKind.Rooms}
     };
     let insightFacade: InsightFacade;
     let testQueries: ITestQuery[] = [];

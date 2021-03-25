@@ -1,4 +1,4 @@
-import {InsightDatasetKind, ResultTooLargeError} from "./IInsightFacade";
+import {ResultTooLargeError} from "./IInsightFacade";
 import {Dataset} from "./Dataset";
 import Decimal from "decimal.js";
 import QT = require("./QueryTest");
@@ -27,10 +27,6 @@ class Query {
         this.sortingUP = qt.sortingUP;
         this.GROUPKeys = qt.GROUPKeys;
         this.APPLYS = qt.APPLYS;
-        // TODO: remove
-        if (this.dataset.kind === InsightDatasetKind.Rooms) {
-            return [];
-        }
         this.performQueryHelper(query);
         return this.data;
     }
