@@ -1,4 +1,4 @@
-import {InsightDatasetKind, InsightError} from "./IInsightFacade";
+import {InsightError} from "./IInsightFacade";
 import {Dataset} from "./Dataset";
 
 class QueryTest {
@@ -6,7 +6,7 @@ class QueryTest {
     public dataset: Dataset;
     public columnKeys: string[] = [];
     public sortingKeys: string[];
-    public sortingUP: number = 1;
+    public sortingUP: boolean;
     private FILTERS: string[] = ["AND", "OR", "LT", "GT", "EQ", "IS", "NOT"];
     private MFIELDS: { [id: string]: string[] } = {courses: ["avg", "pass", "fail", "audit", "year"],
         rooms: ["lat", "lon", "seats"]};
@@ -14,7 +14,7 @@ class QueryTest {
     private SFIELDS: { [id: string]: string[] } = {courses: ["dept", "id", "instructor", "title", "uuid"],
         rooms: ["fullname", "shortname", "number", "name", "address", "type", "furniture", "href"]};
 
-    public GROUPPresent: boolean;
+    private GROUPPresent: boolean;
     public GROUPKeys: string[];
     public APPLYS: any[];
     private APPLYKEYS: string[] = [];
@@ -174,12 +174,9 @@ class QueryTest {
 
     public ORDERTest(query: any) {
         if (typeof query === "string") {
-            if (!(this.columnKeys.includes(query))) {
-                throw new InsightError();
-            }
-            this.sortingKeys = [query];
-        } else {
-            if (query === null
+            query = { dir: "UP", keys: [query]};
+        }
+        if (query === null
                 || query.constructor !== Object
                 || Object.keys(query).length !== 2
                 || !(query.hasOwnProperty("dir"))
@@ -188,13 +185,10 @@ class QueryTest {
                 || !(query["keys"] instanceof Array)
                 || query["keys"].length === 0
                 || !(query["keys"].every((e) => this.columnKeys.includes(e)))) {
-                    throw new InsightError();
-            }
-            this.sortingKeys = query["keys"];
-            if (query["dir"] === "DOWN") {
-                this.sortingUP = -1;
-            }
+            throw new InsightError();
         }
+        this.sortingKeys = query["keys"];
+        this.sortingUP = query["dir"] === "UP";
     }
 
     public TRANSFORMATIONSTest(query: any) {

@@ -2,7 +2,7 @@ import { expect } from "chai";
 import * as chai from "chai";
 import * as fs from "fs-extra";
 import * as chaiAsPromised from "chai-as-promised";
-import {InsightDatasetKind, InsightError} from "../src/controller/IInsightFacade";
+import {InsightDataset, InsightDatasetKind, InsightError} from "../src/controller/IInsightFacade";
 import InsightFacade from "../src/controller/InsightFacade";
 import Log from "../src/Util";
 import TestUtil from "./TestUtil";
@@ -344,7 +344,24 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
         });
         return expect(futureResult).eventually.deep.equal(true);
     });
+
+    it("Should list a dataset", function () {
+        const id: string = "courses";
+        const dataset: InsightDataset = {
+            id: id,
+            kind: InsightDatasetKind.Courses,
+            numRows: 64612,
+        };
+        const expected: string[] = [id];
+        const futureResult: Promise<string[]> = insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Courses);
+        return expect(futureResult).to.eventually.deep.equal(expected).then(() => {
+            const expected2: InsightDataset[] = [dataset];
+            const futureResult2: Promise<InsightDataset[]> = insightFacade.listDatasets();
+            return expect(futureResult2).to.eventually.deep.equal(expected2);
+        });
+    });
     */
+
 });
 
 /*
