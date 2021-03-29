@@ -1,4 +1,4 @@
-import {ResultTooLargeError} from "./IInsightFacade";
+import {InsightDatasetKind, ResultTooLargeError} from "./IInsightFacade";
 import {Dataset} from "./Dataset";
 import Decimal from "decimal.js";
 import QT = require("./QueryTest");

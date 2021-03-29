@@ -116,7 +116,7 @@ let constructRoomFromRow = function (fullname: string, shortName: string, addres
     const type: string = row.childNodes[7].childNodes[0].value.trim();
     const index: number = roomsHref.lastIndexOf("-") + 1;
     const num: string = roomsHref.slice(index);
-    const name: string = shortName + " " + num;
+    const name: string = shortName + "_" + num;
     return new Room(fullname, shortName, num, name, address, lat, lon, seats, type, furniture,
         roomsHref);
 };
