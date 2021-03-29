@@ -1,5 +1,5 @@
 {
-    "title": "Test COUNT",
+    "title": "Test AVG",
     "query": {
         "WHERE": {},
         "OPTIONS": {
