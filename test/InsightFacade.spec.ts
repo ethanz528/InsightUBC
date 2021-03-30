@@ -97,6 +97,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
     // ****
     // This is a unit test. You should create more like this!
 
+    /*
     it("Should add a valid dataset", function () {
         const id: string = "courses";
         const expected: string[] = [id];
@@ -392,6 +393,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
     // isBuildingValid test
     // ******
     // ****
+    /*
     it("Should return true as building is valid", function () {
         const id: string = "rooms";
         const fn: string = "Allard Hall (LAW)";
@@ -445,6 +447,7 @@ describe("InsightFacade Add/Remove/List Dataset", function () {
         const futureResult: Promise<string[]> = insightFacade.addDataset(id, datasets[id], InsightDatasetKind.Rooms);
         return expect(futureResult).to.eventually.deep.equal(expected);
     });
+    */
 
 });
 
