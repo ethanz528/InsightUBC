@@ -1,3 +1,7 @@
 {
-    "query1": "simple query IS comparison for department with two columns and old order syntax"
+    "query1": "simple query IS comparison for department with two columns and old order syntax",
+    "query2": "AND test",
+    "query3": "OR test",
+    "query4": "NAND test",
+    "query5": "COLUMNS test"
 }

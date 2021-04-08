@@ -9,3 +9,9 @@
  */
 
 // TODO: implement!
+const el = document.getElementById("submit-button");
+document.getElementById("submit-button").addEventListener("click", () => {
+    query = CampusExplorer.buildQuery();
+    result = CampusExplorer.sendQuery(query);
+    CampusExplorer.renderResult(result);
+})
